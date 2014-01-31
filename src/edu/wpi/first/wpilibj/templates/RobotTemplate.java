@@ -21,7 +21,13 @@
 package edu.wpi.first.wpilibj.templates;
 
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Joystick.AxisType;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Victor;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -31,50 +37,65 @@ import edu.wpi.first.wpilibj.IterativeRobot;
  * directory.
  */
 public class RobotTemplate extends IterativeRobot {
+    
+    // TODO get channels
+    private final int leftDriveStickChannel = 1;
+    private final int rightDriveStickChannel = 2;
+    
+    private final int leftDriveMotorChannel = 3;
+    private final int rightDriveMotorChannel = 4;
+    
+    private final int shooterEncoderChannelA = 5;
+    private final int shooterEncoderChannelB = 6;
+    private final int shooterMotorChannel = 5;
+    
+    private final AxisType leftDriveAxis = AxisType.kY; // TODO find correct mapping
+    private final AxisType rightDriveAxis = AxisType.kY; // TODO find correct mapping
+    
+    private Joystick leftDriveStick;
+    private Joystick rightDriveStick;
+    
+    private SpeedController leftDriveMotor;
+    private SpeedController rightDriveMotor;
+    
+    private PIDController shooterPID;
+    private Encoder shooterEncoder;
+    private SpeedController shooterMotor;
+    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-
+        leftDriveStick = new Joystick(leftDriveStickChannel);
+        rightDriveStick = new Joystick(rightDriveStickChannel);
+        
+        shooterEncoder = new Encoder(shooterEncoderChannelA, shooterEncoderChannelB);
+        
+         // TODO verify we're using Victors
+        leftDriveMotor = new Victor(leftDriveMotorChannel);
+        rightDriveMotor = new Victor(rightDriveMotorChannel);
+        shooterMotor = new Victor(shooterMotorChannel);
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-
+        // TODO
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-
-
-
-
-
-        // Driver joysticks.
-        // If neither Joystick buttons 3 are pressed, then drive at full speed.
-        // If either  Joystick buttons 3 are pressed, then drive at 3/4 speed.
-        // If both    Joystick buttons 3 are pressed, then drive at 1/2 speed.
-        i = (leftDriveStick.getRawButton(kSlowStickButton) ? 2 : 0) +
-            (rightDriveStick.getRawButton(kSlowStickButton) ? 1 : 0);
-        if (i == 0)
-            d = 1.0D;
-        else if ((i == 1) || (i == 2))
-            d = 0.75D;
-        else if (i == 3)
-            d = 0.50;
-        // Set the motors speed.
-        // TODO TO curve the joystick either square or cube the joystick values.
-        leftDriveMotor.set  (-d * leftDriveStick.getY());
-        rightDriveMotor.set (d * rightDriveStick.getY());
-
-
-
-	
+        
+        // naive tank drive - replace this
+        leftDriveMotor.set(leftDriveStick.getAxis(leftDriveAxis));
+        rightDriveMotor.set(rightDriveStick.getAxis(rightDriveAxis));
+        
+        
+        
     }
     
     /**
