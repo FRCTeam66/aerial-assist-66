@@ -18,7 +18,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package edu.wpi.first.wpilibj.templates;
+package edu.wpi.first.team66;
 
 
 import edu.wpi.first.wpilibj.Encoder;
@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.Joystick.AxisType;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.buttons.Button;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -36,7 +37,7 @@ import edu.wpi.first.wpilibj.Victor;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotTemplate extends IterativeRobot {
+public class RobotMain extends IterativeRobot {
     
     // TODO get channels
     private final int leftDriveStickChannel = 1;
@@ -49,11 +50,14 @@ public class RobotTemplate extends IterativeRobot {
     private final int shooterEncoderChannelB = 6;
     private final int shooterMotorChannel = 5;
     
-    private final AxisType leftDriveAxis = AxisType.kY; // TODO find correct mapping
-    private final AxisType rightDriveAxis = AxisType.kY; // TODO find correct mapping
+    // TODO get appropriate axis mapping
+    private final AxisType leftDriveAxis = AxisType.kY;
+    private final AxisType rightDriveAxis = AxisType.kY;
     
     private Joystick leftDriveStick;
     private Joystick rightDriveStick;
+    
+    private Button shootButton;
     
     private SpeedController leftDriveMotor;
     private SpeedController rightDriveMotor;
@@ -61,6 +65,8 @@ public class RobotTemplate extends IterativeRobot {
     private PIDController shooterPID;
     private Encoder shooterEncoder;
     private SpeedController shooterMotor;
+    
+    private Shooter shooter;
     
     /**
      * This function is run when the robot is first started up and should be
@@ -76,6 +82,8 @@ public class RobotTemplate extends IterativeRobot {
         leftDriveMotor = new Victor(leftDriveMotorChannel);
         rightDriveMotor = new Victor(rightDriveMotorChannel);
         shooterMotor = new Victor(shooterMotorChannel);
+        
+        shooter = new Shooter(shooterMotor, shooterEncoder);
     }
 
     /**
@@ -94,8 +102,13 @@ public class RobotTemplate extends IterativeRobot {
         leftDriveMotor.set(leftDriveStick.getAxis(leftDriveAxis));
         rightDriveMotor.set(rightDriveStick.getAxis(rightDriveAxis));
         
-        
-        
+        if (shootButton.get() && shooter.canShoot()) {
+            // TODO compute target relative position (vision task or should
+            // we have a default/manual value?)
+            double distance = 5;
+            double height = 2;
+            shooter.shoot(distance, height);
+        }
     }
     
     /**
