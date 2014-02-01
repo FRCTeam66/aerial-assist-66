@@ -17,24 +17,29 @@ import edu.wpi.first.wpilibj.SpeedController;
  */
 public class Shooter {
     
+    private static final int
+            READY_STATE = 0,
+            SHOOTING_STATE = 1,
+            RESETTING_STATE = 2;
+    
     private final PIDController pidController;
-    private static final int READY = 0, SHOOTING = 1, RESETTING = 2;
+    
     private int currentState;
     
     public Shooter(SpeedController motor, Encoder encoder) {
         // TODO compute initial parameters
-        this.currentState = RESETTING;
+        this.currentState = RESETTING_STATE;
         this.pidController = new PIDController(0, 1, 1, encoder,
                 new TargetReachedListenerProxy(motor));
         
     }
     
     public boolean canShoot() {
-        return currentState == READY;
+        return currentState == READY_STATE;
     }
     
     public void shoot(double distance, double peak) {
-        if (currentState != READY) {
+        if (currentState != READY_STATE) {
             return;
         }
         
@@ -45,7 +50,7 @@ public class Shooter {
          * this in the "READY" state, which has no other transition)
          */
         pidController.setPID(1, 0.5, -0.5);
-        currentState = SHOOTING;
+        currentState = SHOOTING_STATE;
     }
     
     /**
@@ -72,12 +77,12 @@ public class Shooter {
                  * controller about a new target)
                  */
                 switch (currentState) {
-                    case RESETTING:
+                    case RESETTING_STATE:
                         // reset, maintain position
-                        currentState = READY;
-                    case SHOOTING:
+                        currentState = READY_STATE;
+                    case SHOOTING_STATE:
                         // shot fired, reset
-                        currentState = RESETTING;
+                        currentState = RESETTING_STATE;
                         // TODO compute reset parameters
                         pidController.setPID(0, 0, 0);
                     default:
