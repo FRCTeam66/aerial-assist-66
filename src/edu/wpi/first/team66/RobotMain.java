@@ -21,14 +21,15 @@
 package edu.wpi.first.team66;
 
 
+import edu.wpi.first.team66.params.RobotParams;
+import edu.wpi.first.team66.params.InputParams;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Joystick.AxisType;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.buttons.Button;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -37,53 +38,41 @@ import edu.wpi.first.wpilibj.buttons.Button;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotMain extends IterativeRobot {
+public class RobotMain extends IterativeRobot implements RobotParams, InputParams {
     
-    // TODO get channels
-    private final int leftDriveStickChannel = 1;
-    private final int rightDriveStickChannel = 2;
+    /**
+     * Inputs
+     */
+    private final Joystick gamepad = new Joystick(gamepadPort);
     
-    private final int leftDriveMotorChannel = 3;
-    private final int rightDriveMotorChannel = 4;
+    private final Button shootButton = new JoystickButton(gamepad, shootButtonId);
     
-    private final int shooterEncoderChannelA = 5;
-    private final int shooterEncoderChannelB = 6;
-    private final int shooterMotorChannel = 5;
+    private final Button preciseModeButton = new JoystickButton(gamepad, preciseModeButtonId);
     
-    // TODO get appropriate axis mapping
-    private final AxisType leftDriveAxis = AxisType.kY;
-    private final AxisType rightDriveAxis = AxisType.kY;
+    /**
+     * Drive system
+     */
+    private final SpeedController leftDriveMotor = new Victor(leftDriveMotorChannel);
     
-    private Joystick leftDriveStick;
-    private Joystick rightDriveStick;
+    private final SpeedController rightDriveMotor = new Victor(rightDriveMotorChannel);
     
-    private Button shootButton;
+    private final TankDrive tankDrive = new TankDrive(leftDriveMotor, rightDriveMotor);
     
-    private SpeedController leftDriveMotor;
-    private SpeedController rightDriveMotor;
+    /**
+     * Shooter system
+     */
+    private final Encoder shooterEncoder = new Encoder(shooterEncoderChannelA, shooterEncoderChannelB);;
     
-    private PIDController shooterPID;
-    private Encoder shooterEncoder;
-    private SpeedController shooterMotor;
+    private final SpeedController shooterMotor = new Victor(shooterMotorChannel);
     
-    private Shooter shooter;
+    private final Shooter shooter = new Shooter(shooterMotor, shooterEncoder);
     
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-        leftDriveStick = new Joystick(leftDriveStickChannel);
-        rightDriveStick = new Joystick(rightDriveStickChannel);
         
-        shooterEncoder = new Encoder(shooterEncoderChannelA, shooterEncoderChannelB);
-        
-         // TODO verify we're using Victors
-        leftDriveMotor = new Victor(leftDriveMotorChannel);
-        rightDriveMotor = new Victor(rightDriveMotorChannel);
-        shooterMotor = new Victor(shooterMotorChannel);
-        
-        shooter = new Shooter(shooterMotor, shooterEncoder);
     }
 
     /**
@@ -98,10 +87,20 @@ public class RobotMain extends IterativeRobot {
      */
     public void teleopPeriodic() {
         
-        // naive tank drive - replace this
-        leftDriveMotor.set(leftDriveStick.getAxis(leftDriveAxis));
-        rightDriveMotor.set(rightDriveStick.getAxis(rightDriveAxis));
+        updateTankDriveFromInput();
         
+        updateShooterFromInput();
+    }
+    
+    public void updateTankDriveFromInput() {
+        double leftSpeed = gamepad.getRawAxis(leftDriveAxisId);
+        double rightSpeed = gamepad.getRawAxis(rightDriveAxisId);
+        double scale = preciseModeButton.get() ? 0.25 : 1.0;
+        
+        tankDrive.set(leftSpeed, rightSpeed, scale);
+    }
+    
+    public void updateShooterFromInput() {
         if (shootButton.get() && shooter.canShoot()) {
             // TODO compute target relative position (vision task or should
             // we have a default/manual value?)
