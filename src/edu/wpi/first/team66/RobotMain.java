@@ -1,16 +1,3 @@
-// * Class T66Robot
-// *
-// *  TTTTT      6          6
-// *    T       6          6   
-// *    T      6          6    
-// *    T     6          6      
-// *    T    6   666    6   666 
-// *    T    6     6    6     6
-// *    T     66666      66666 
-// *
-// * Edit Date: January 24, 2014
-// *
-
 /*----------------------------------------------------------------------------*/
 /* Copyright (c) FIRST 2008. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
@@ -21,8 +8,10 @@
 package edu.wpi.first.team66;
 
 
+import edu.wpi.first.team66.math.Pose;
 import edu.wpi.first.team66.params.RobotParams;
 import edu.wpi.first.team66.params.InputParams;
+import edu.wpi.first.team66.vision.VisionSystem;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -30,6 +19,7 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import edu.wpi.first.wpilibj.camera.AxisCamera;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -68,44 +58,115 @@ public class RobotMain extends IterativeRobot implements RobotParams, InputParam
     private final Shooter shooter = new Shooter(shooterMotor, shooterEncoder);
     
     /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
+     * Vision system
+     */
+    private final AxisCamera shooterCamera = AxisCamera.getInstance();
+    private final VisionSystem visionSystem = null;
+    
+    /**
+     * Timing system
+     */
+    private final DeltaTimer continuousTimer = new DeltaTimer();
+    private final DeltaTimer periodicTimer = new DeltaTimer();
+    
+    private double continuousDeltaTime = 0.0;
+    private double periodicDeltaTime = 0.0;
+    
+    /**
+     * Called once when the robot is started.
      */
     public void robotInit() {
-        
+        continuousTimer.reset();
+        periodicTimer.reset();
     }
-
+    
     /**
-     * This function is called periodically during autonomous
+     * Called every cycle of the main loop (as fast as it can spin), during
+     * any mode.
      */
-    public void autonomousPeriodic() {
+    public void robotContinuous() {
+        continuousDeltaTime = continuousTimer.getDeltaTime();
+        tankDrive.update(continuousDeltaTime);
+    }
+    
+    public void robotPeriodic() {
+        periodicDeltaTime = periodicTimer.getDeltaTime();
         // TODO
     }
 
     /**
-     * This function is called periodically during operator control
+     * Called whenever autonomous mode is entered, before autonomousPeriodic
+     * or autonomousContinuous.
+     */
+    public void autonomousInit() {
+        // TODO
+    }
+    
+    /**
+     * Called only when there is new data from the Driver Station (~50Hz).
+     */
+    public void autonomousPeriodic() {
+        robotPeriodic();
+        // TODO
+    }
+
+    /**
+     * Called every cycle of the main loop (as fast as it can spin).
+     */
+    public void autonomousContinuous() {
+        robotContinuous();
+        // 
+    }
+    
+    /**
+     * Called whenever teleop mode is entered, before teleopPeriodic
+     * or teleopContinuous.
+     */
+    public void teleopInit() {
+        // TODO
+    }
+    
+    /**
+     * Called only when there is new data from the Driver Station (~50Hz).
      */
     public void teleopPeriodic() {
+        robotPeriodic();
         
         updateTankDriveFromInput();
         
         updateShooterFromInput();
     }
     
-    public void updateTankDriveFromInput() {
+    /**
+     * Called every cycle of the main loop (as fast as it can spin).
+     */
+    public void teleopContinuous() {
+        robotContinuous();
+        // TODO
+    }
+    
+    /**
+     * Use input from user to update drive system.
+     */
+    private void updateTankDriveFromInput() {
         double leftSpeed = gamepad.getRawAxis(leftDriveAxisId);
         double rightSpeed = gamepad.getRawAxis(rightDriveAxisId);
         double scale = preciseModeButton.get() ? 0.25 : 1.0;
         
-        tankDrive.set(leftSpeed, rightSpeed, scale);
+        tankDrive.setTarget(leftSpeed, rightSpeed, scale);
     }
     
-    public void updateShooterFromInput() {
+    /**
+     * Use input from user to update shooter system.
+     */
+    private void updateShooterFromInput() {
         if (shootButton.get() && shooter.canShoot()) {
-            // TODO compute target relative position (vision task or should
-            // we have a default/manual value?)
-            double distance = 5;
-            double height = 2;
+            
+            Pose targetPose = visionSystem.findTeleopTarget();
+            
+            double distance = targetPose.position.x;
+            double height = targetPose.position.y;
+            
             shooter.shoot(distance, height);
         }
     }
