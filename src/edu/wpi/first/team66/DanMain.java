@@ -167,7 +167,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Timer;
 
-
+import edu.wpi.first.team66.params.IOParams;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -176,51 +176,9 @@ import edu.wpi.first.wpilibj.Timer;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class DanMain extends IterativeRobot {
+public class DanMain extends IterativeRobot implements IOParams {
 
-    //final int kAIOSolt = 0;                       // Slot number of the Analog IO module
-    final int DIO_SLOT = 1;                         // Slot number of the Digital IO module
-    final int SIO_SLOT = 2;                         // Slot number of the Solenoid IO module
-
-    // PWM IO Channels
-    final int LEFT_MOTOR_PWM_CHANNEL             = 1; // PWM channel numbers
-    final int RIGHT_MOTOR_PWM_CHANNEL            = 2;
-    final int SHOOTER_MOTOR_PWM_CHANNEL          = 3;
-    final int BALL_ROLLER_MOTOR_PWM_CHANNEL       = 4;
-
-    // Relay IO Channels
-    final int CAMERA_LIGHTS_RELAY_RIO_CHANNEL     = 1;
-    final int AIR_COMPRESSOR_RELAY_RIO_CHANNEL    = 8;
     
-    // Solenoid IO Channels
-    final int HIGH_SHIFTER_SOLENOID_SHIFTER_SIO_CHANNEL   = 1;   // Shift to high gear
-    final int LOW_SHIFTER_SOLENOID_SIO_CHANNEL    = 2;   // Shift to low  gear
-    final int ARM_EXTEND_SOLENOID               = 3;   // Arm extend solenoid
-    final int ARM_RETRACT_SOLENOID              = 4;   // Arm retrace Solenoid
-
-    // Digital IO Channels
-    final int LEFT_WHEEL_ENCODER_BIT_0             = 1;
-    final int LEFT_WHEEL_ENCODER_BIT_1             = 2;
-    final int RIGHT_WHEEL_ENCODER_BIT_0            = 3;
-    final int RIGHT_WHEEL_ENCODER_BIT_1            = 4;
-    final int SHOOTER_ARM_ENCODER_BIT_0            = 5;
-    final int SHOOTER_ARM_ENCODER_BIT_1            = 6;
-    final int ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL    = 7;  // Digital IO channels for Arm Extend  Limit Switch.
-    final int ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL   = 8;  // Digital IO channels for Arm Retract Limit Switch.
-    final int SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL = 9;  // Digital IO channels for Shooter Cocked Limit Switch.
-    final int SHOOTER_SHOT_LIMIT_SWITCH_DI_CHANNEL   = 10; // Digital IO channels for Shooter Shot Limit Switch.
-    final int NASSON_PRESSURE_SWITCH_DI_CHANNEL    = 11; // Digital IO channels for the Compressor switch.
-    final int AUTONOMOUS_BIT_0_DI_CHANNEL          = 12; // Digital IO channels for autonomous Bit 0
-    final int AUTONOMOUS_BIT_1_DI_CHANNEL          = 13; // Digital IO channels for autonomous Bit 1
-    final int AUTONOMOUS_BIT_2_DI_CHANNEL          = 14; // Digital IO channels for autonomous Bit 2
-    
-    // Analog IO Channels
-    final int GYRO_ANALOG_AI_CHANNEL               = 1;  // Analog channel for Gyro.
-    final int BALL_LOADED_SENSOR_AI_CHANNEL        = 2;  // For Sharp infrared distance sensor to detect a ball.
-    final int ARM_POSITION_POT_AI_CHANNEL          = 3;  // Absolute arm position from an alalon potentiatometer.
-    final int DIAGNOSTIC_SELECTOR_AI_CHANNEL      = 7;  // Analog IO channels for diagnostics selector.
-    final int BATTERY_VOLTAGE_AI_CHANNEL          = 8;  // Channel allocated by FIRST for battery voltage.
-
     // Driver Station and Diagnostics Display
     DriverStation ds;                               // Define the drivers station object
     DriverStationLCD dslcd;
@@ -235,14 +193,7 @@ public class DanMain extends IterativeRobot {
     Encoder leftMotorEncoder;
     Encoder rightMotorEncoder;
     Encoder shooterMotorEncoder;
-    final double ENCODER_WHEELS_DISTANCE_PER_PULSE = 0.0075d; // Distance in inches per click
-            
-    final double JOYSTICK_DEADBAND = 0.08;           // Joystick deadband for the motors.
-   
-    final boolean TODO_TRIGGER_SHIFTER_OFF = false;       // Trigger is out
-    final boolean TODO_TRIGGER_SHIFTER_ON  = true;        // Trigger is depressed
-
-    final double STEERING_MOTOR_DEADBAND = 0.15;     // This amount +/- in the X-axis to drive straight.
+    
     //double driverStickXAxis = 0.0;                // Save this for robot diagnostics
     //double driverStickYAxis = 0.0;
 
@@ -254,17 +205,6 @@ public class DanMain extends IterativeRobot {
 
     // Gyro objects and constants. The Gyro object takes care of everything for us.
     Gyro gyro;                                      // Gyro for autonomous steering.
-    final double TODO_GYRO_DEADBAND = 1.5;               // Deadband degrees.
-
-    // Driver joystick buttons.
-    final int DRIVER_SHIFTER_TRIGGER = 1;            // Switch the logical front of the bot for easier steering.
-    final int DRIVE_SWITCH_RED   = 4;                // 
-    final int DRIVE_SWITCH_WHITE = 3;                // 
-    final int DRIVE_SWITCH_BLUE  = 5;                // 
-    final int DRIVE_SWITCH_POLE_SEEK_OFF = 6;          // 
-    final int DRIVE_SWITCH_POLE_SEEK_ON  = 7;          // 
-    final int DRIVE_SWITCH_ESTOP_CLEAR = 10;  // Continue
-    final int DRIVE_SWITCH_ESTOP_SET = 11;    // Soft eStop
 
     boolean emergencyStop = false;
 
@@ -284,51 +224,22 @@ public class DanMain extends IterativeRobot {
     DigitalInput autonomousBit1;
     DigitalInput autonomousBit2;
 
-    final int JOYSTICK_ARM_SHOOT_BUTTON        = 1;   // Trigger
-    final int JOYSTICK_ARM_LIGHT_TOGGLE        = 6;   // Camera lights toggle
-    final int JOYSTICK_ARM_EXTEND_BUTTON       = 9;
-    final int JOYSTIC_ARM_RETRACT_BUTTON      = 8;
-    final int JOYSTICK_ARM_EJECT_BUTTON        = 7;
-    final int JOYSTICK_ARM_ESTOP_CLEAR = 10;  // Continue
-    final int JOYSTICK_ARM_ESTOP_SET   = 11;  // Soft eStop
-
-    final boolean JOYSTICK_BUTTON_PRESSED     = true;  // Joystick button is pressed. VERIFY
-    final boolean JOYSTICK_BUTTON_NOT_PRESSED  = false; // Joystick button is NOT pressed. VERIFY
-
-
     // Ball Roller Motor Declarations and Constants.
     private Victor ballRollerMotor;
-    private final boolean LIMIT_SWITCH_PRESSED    = true;
-    private final boolean LIMIT_SWITCH_NOT_PRESSED = false;
     
     AnalogChannel ballLoadedSensor;                 // Used to detect if a ball is in the shooter mechanism.
      
-    final double BALL_ROLLER_MOTOR_LOAD_ON  = -1.00;   // Speed that the rollers will turn Picking-up a ball.
-    final double BALL_ROLLER_MOTOR_EJECT_ON = 1.00;    // Speed that the rollers will turn Ejecting a ball.
-    final double BALL_ROLLER_MOTOR_OFF     = 0.00;    // Speed that the rollers will turn Off.
+
 
     DigitalInput armExtendLimitSwitch;              // Limit Switches.
     DigitalInput armRetractLimitSwitch;
 
-    final boolean armRetractSolenoidExtend = true;
-    final boolean armExtendSolenoidExtend = false;
-        
-    final boolean armRetractSolenoidRetract = true;
-    final boolean armExtendSolenoidRetract = false;
-
     AnalogChannel armPosition;
-    final int ARM_POSITION_MIN = 100;                // Arm in cocked position.
-    final int ARM_POSITION_MAX = 600;                // Arm can exceed this angle!
+
     
     // Shooter stuff...
     DigitalInput shooterCockedLimitSwitch;          // Limit Switches.
     DigitalInput shooterShotLimitSwitch;            // Shooter iss moved all the way.
-    
-    final boolean ARM_COCKED    = LIMIT_SWITCH_PRESSED;    // Limit switch is pressed.
-    final boolean ARM_NOT_COCKED = LIMIT_SWITCH_NOT_PRESSED; // Limit switch is pressed.
-    
-    final boolean BALL_IN_SHOOTER    = true;         // Returned from isBallInShooter Function.
-    final boolean BALL_NOT_IN_SHOOTER = false;
     
     boolean ballEjectInProcess = false;             // Remembers if the ball eject button was pressed.
 //    final double kShootAndCockMotorOn  = 1.0;       // This will be controlled in a PID loop.
