@@ -1268,31 +1268,6 @@ public class DanMain extends IterativeRobot implements IOParams {
     } // Move_Stop ()
 
 
-    // Function: Ramp Up 
-    // Code: rampup(max, start, ramptime) 
-    // Parameters:
-    //   max is the maximum speed to ramp up to (0.0 to 1.0)
-    //	 d is the distance in inches, look at its sign.
-    //   start is the starting time for this move.
-    //   ramp time is the time to get to max speed.
-    // Use a linear function between ramp up time and power range to travel
-    // to compute new power setting.
-    double rampup (double max, double dist, double start, double ramptime)
-    {
-        double t;
-
-        max = (dist >= 0) ? max : -max;             // If moving backward made power negative.
-        
-        if ((start + ramptime) < moveTimer.get ()) { // Do ramping for only n-second.
-            t = moveTimer.get () - start;           // How long have you been ramping?
-
-            return  max * (t /ramptime);            // New power setting. What % of the ramp time?
-        }
-        else {
-            return max;                             // Beyond ramp time just use the maximum.
-        } // if ((start + ramptime) < moveTimer.get ())
-    } // rampup ()
-
     void displayDiagnostics () {
         int d;                                     // Which diagnostic to run.
         String b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11;
