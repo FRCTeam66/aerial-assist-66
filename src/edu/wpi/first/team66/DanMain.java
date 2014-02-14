@@ -183,14 +183,12 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     
     private Loader loader = null;
     
+    private Shooter shooter = null;
     
     // Driver Station and Diagnostics Display
     DriverStation ds;                               // Define the drivers station object
     DriverStationLCD dslcd;
     Hand hand;                                      // Required for the trigger function
-
-    SpeedController shooterMotor;
-    Encoder shooterMotorEncoder;
     
     //double driverStickXAxis = 0.0;                // Save this for robot diagnostics
     //double driverStickYAxis = 0.0;
@@ -221,29 +219,19 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     DigitalInput autonomousBit2;
 
     // Ball Roller Motor Declarations and Constants.
-    
-    AnalogChannel ballLoadedSensor;                 // Used to detect if a ball is in the shooter mechanism.
-     
-
 
     DigitalInput armExtendLimitSwitch;              // Limit Switches.
     DigitalInput armRetractLimitSwitch;
 
     AnalogChannel armPosition;
 
-    
-    // Shooter stuff...
-    DigitalInput shooterCockedLimitSwitch;          // Limit Switches.
-    DigitalInput shooterShotLimitSwitch;            // Shooter iss moved all the way.
+
 //    final double kShootAndCockMotorOn  = 1.0;       // This will be controlled in a PID loop.
 
 
 
 // TODO CALIBRATE if needed
-    
-    int shootPastState = 0;                         // Shoot Method State Machine state variables.
-    int shootState = 0;
-    int shootNextState = 0;
+
     boolean shootButtonPressed = false;
 
     // Shooter diagnostics.  The shoot diagnostics code will always run in the shoot function.
@@ -372,42 +360,40 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
             leftMotorEncoder,
             rightMotorEncoder);
         
-      //shooterMotor = new Jaguar(kDIOSlot, kShooterMotorPWMChannel);
-        shooterMotor = new Victor(DIO_SLOT, SHOOTER_MOTOR_PWM_CHANNEL);
+        // Setup loader system
+        
+        loader = new Loader(
+                new Solenoid(ARM_RETRACT_SOLENOID),
+                new Solenoid(ARM_EXTEND_SOLENOID),
+                new Victor(DIO_SLOT, BALL_ROLLER_MOTOR_PWM_CHANNEL),
+                new DigitalInput(ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL),
+                new DigitalInput(ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL));
+        
+        // Setup shooter system
+        
+        SpeedController shooterMotor = new Victor(DIO_SLOT, SHOOTER_MOTOR_PWM_CHANNEL);
 
-        shooterMotorEncoder  = new Encoder(DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_0, 
+        Encoder shooterMotorEncoder  = new Encoder(DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_0, 
                                            DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_1);
         shooterMotorEncoder.setDistancePerPulse(ENCODER_SHOOTER_DISTANCE_PER_PULSE);
         shooterMotorEncoder.start();
-
-        // Note "boolean reverseDirection" parameter may be needed to set output of encoders, See JavaDocs.
-        //myEncoder = new Encoder(aSlot, aChannel, bSlot, bChannel, myBackwards, CounterBase.EncodingType.k4X);
-        //steeringEncoder = new Encoder(kDIOSlot, kSteeringInputAChannel,
-        //                              kDIOSlot, kSteeringInputBChannel,
-        //                              false, CounterBase.EncodingType.k2X); // also EncodingType.k4X_val
+        
+        DigitalInput shooterCockedLimitSwitch = new DigitalInput(SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL);
+        DigitalInput shooterShotLimitSwitch   = new DigitalInput(SHOOTER_SHOT_LIMIT_SWITCH_DI_CHANNEL);
+        
+        AnalogChannel ballLoadedSensor = new AnalogChannel(BALL_LOADED_SENSOR_AI_CHANNEL);
+        
+        shooter = new Shooter(
+                shooterMotor,
+                shooterMotorEncoder,
+                ballLoadedSensor,
+                shooterCockedLimitSwitch,
+                shooterShotLimitSwitch,
+                loader);
 
         gyro = new Gyro(GYRO_ANALOG_AI_CHANNEL);       // Gyro object
         gyro.reset();
         
-        // Setup the Ball Roller Motor.
-        loader = new Loader(
-                new Solenoid(ARM_RETRACT_SOLENOID),
-                new Solenoid(ARM_EXTEND_SOLENOID),
-                new Victor(DIO_SLOT, BALL_ROLLER_MOTOR_PWM_CHANNEL));
-        
-        armExtendLimitSwitch  = new DigitalInput(ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL);
-        armRetractLimitSwitch = new DigitalInput(ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL);
-        
-        armPosition = new AnalogChannel(ARM_POSITION_POT_AI_CHANNEL);
-        
-        // Shooter stuff.
-        shooterCockedLimitSwitch = new DigitalInput(SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL);
-        shooterShotLimitSwitch   = new DigitalInput(SHOOTER_SHOT_LIMIT_SWITCH_DI_CHANNEL);
-        
-        // Ball loaded sensor (Sharp infrared distance sensor)
-        //ballLoadedSensor = new AnalogChannel(kAIOSolt, kBallLoadedSensorAIChannel);
-        ballLoadedSensor = new AnalogChannel(BALL_LOADED_SENSOR_AI_CHANNEL);
-
         // Autonomous stuff...
         autonomousBit0 = new DigitalInput(AUTONOMOUS_BIT_0_DI_CHANNEL);
         autonomousBit1 = new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL);
@@ -422,7 +408,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         diagnosticSelector = new AnalogChannel(DIAGNOSTIC_SELECTOR_AI_CHANNEL);
         //System.out.println("diagnosticSelector: " + format(diagnosticSelector.getAverageValue (),6, 3));
 
-        shootState = shootNextState = shootPastState = 0; // Shooting state machine controls.
         shootButtonPressed = false;                 // Assume the shoot button is not pressure
 
         aState = aStateNext = aStatePast = 0;       // Autonomous state machine controls.    
@@ -445,12 +430,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
         lowShifterSolenoid.set  (lowShifterHigh);    // Initially set it to high gear.
         highShifterSolenoid.set (higherShifterhigh); // Initially set it to high gear.
-
-        
-
-        // Do not mess with the pneumatics here. Leave it alone. 
-        //armExtendSolenoid.set  (false);           // Initially set it to arm retracted.
-        //armExtendSolenoid.set (true);             // Initially set it to arm retracted.
 
         timer = new Timer ();                       // Instantiate the match timer shootDiag6
         timer.reset();
@@ -508,13 +487,13 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
                 System.out.println("Unknown autonomous mode:" + StringUtils.format(autonomousMode, 3));
                 autonomousMode = 0;                 // Pretend there is no autonomous mode.
 
-        } // switch (autonomousMode)
-
-        shoot ();    // Call this eveny message loop to run the shooting state machine.
+        }
         
-        tankDrive.update(periodicTimer.getDeltaTime());
+        double deltaTime = periodicTimer.getDeltaTime();
+        shooter.update(deltaTime);
+        tankDrive.update(deltaTime);
 
-    } // public void autonomousPeriodic()
+    }
 
 
     public void teleopInit () {
@@ -587,14 +566,14 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         if (armStick.getRawButton (JOYSTICK_ARM_SHOOT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             if (shootButtonPressed == false) {      // Yes.  Was the shoot button just pressed?
                 shootButtonPressed = true;          // Yes, set a flag.
-                shootStart ();                      // Fire in the hole!
+                shooter.shoot();
             }
         }
         // Else the shooting trigger button released?
         else {              
             if (shootButtonPressed == true) {       // Was the shoot button just released?
                 shootButtonPressed = false;         // Yes, set a flag.
-                shootStop ();                       // Reset the Shoot function state machine.
+                shooter.stop();                   // Reset the Shoot function state machine.
             }
         }
 
@@ -614,12 +593,11 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         } else {
             cameraLightsButtonWasPressed = false;   // Remember that the button is no longer pressed pressed.
         }
-        // -T66
 
-       shoot ();    // Call this every message loop to run the shooting state machine.
-
-       tankDrive.update(periodicTimer.getDeltaTime());
-    } // public void teleopPeriodic()
+        double deltaTime = periodicTimer.getDeltaTime();
+        shooter.update(deltaTime);
+        tankDrive.update(deltaTime);
+    }
 
 
     /**
@@ -631,216 +609,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
 
     // **********  Other Non-FIRST functions  **********
-
-    // shootStart
-    // If shootPastState = shootState = shootNextState = 0 then the shooting is not in process. 
-    void shootStart () {
-        if (shootState != 0) {
-            // Do nothing.  Something is already in process.
-        } else {
-            // Start the shooting process!!!
-            shootNextState = 1;                     // This gets the process started.
-            shootTime.reset ();                     // Get the time that the shooting
-            shootTime.start ();                     // process was started for diagnostics.
-        }
-    } // void ShootStart ()
-
-    // shootStop
-    // Stop the shooting process.
-    // If the shooter is cocking let it continue.
-    // If the ball has not yet been shot then stop the process and reset things.
-    // The reset depends on how far the the shoot process has progressed.
-    void shootStop () {
-        if (shootState == 0) {
-            // Shoot has not started, do nothing.
-        }
-        else if (shootState == 1) {
-            // The shooting process has begun to check that all is right to shoot.
-            // This can be stopped because this state changes nothing.
-            shootTime.stop();                       // For diagnostics.
-            shootTime.reset();
-
-            shootTimer.stop();                      // for shootermechanism.
-            shootTimer.reset();
-            shootNextState = 0;                     // Reset to State 0.
-        }
-        else if (shootState >= 2) {
-            // The shooting is under way - there is no way to safely stop.
-            // Do nothing and let it reset it self.
-        } else {
-            // Do nothing and let it reset it self.
-        }
-    } // void shootStop ()
-    
-    // Shoot the ball!
-    // This method is called in every message loop pass in both autonomous and teleop modes.
-    // There are a number of things to check before shooting.
-    void shoot () {
-        
-        shootPastState = shootState;
-        shootState = shootNextState;
-
-            //shootDiag6 = "State: 0 1abcde 2 3 4 "; // Full state string.
-
-
-        switch (shootState) {
-            // Shooting not in process when in this state.
-            case 0:
-                // Do nothing so that ShootStart () can set shootNextState to start the shooting process.
-
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0              "; // Print this line if the Shooter diagnostics is shown.
-                shootNextState = 0;                 // Just stay in this state until some starts us.
-                break;
-
-            // Check if the robot is in the right condition to shoot.
-            case 1:
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1a           ";
-
-                // Is the arm cocked and ready to shoot?
-                if (shooterCockedLimitSwitch.get () == ARM_NOT_COCKED) {
-                    shootNextState = 1;             // No. Arm is not ready, try again later.
-                    break;
-                }
-
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1ab          ";
-
-                // Is there a ball in the shooter?
-                if (isBallInShooter () == BALL_NOT_IN_SHOOTER) {
-                    shootNextState = 1;             // No, a ball is NOT in the shooter.
-                    break;
-                }
-
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1abc         ";
-
-                // Is the arm in the Extend position?
-                if (armExtendLimitSwitch.get () == LIMIT_SWITCH_NOT_PRESSED) {
-                    loader.eject();
-                    shootNextState = 1;             // Limit Switch is off! Wait.
-                    break;
-                }
-
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1abcd        ";
-
-                loader.stopEjecting();
-
-                // Things look good. Fire!
-                shootNextState = 2;
-                break;
-                
-            // Start the shooting sequence.
-            case 2:
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1abcd 2      ";
-
-// TODO - TURN ON the motors based upon the distance sensed by the camera, and set the power to the PID loops.
-
-                // Zero the encoder counter before shooting.
-                shooterMotorEncoder.reset();
-
-                // Turn on the shooting motor and keep it on.
-                shooterMotor.set (SHOOT_AND_COCK_MOTOR_ON); // For now use a fist shooting power.
-
-                shootNextState = 3;                      // Go complete the re-cocking process.
-                break;
-
-                
-                
-            // Stop the shootere motor when either the encoder has travened the desired
-            // distance or the shooterMotorLimitSwith is pressed by thhe arm.
-            case 3:
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1abcd 2 3    ";
-
-// TODO Put in angle and power settings based on distance calculated from the camera.
-                if ((shooterMotorEncoder.get() >= SHOOTER_DISTANCE) ||
-                    (shooterShotLimitSwitch.get() == LIMIT_SWITCH_PRESSED)) {
-                    shooterMotor.set(SHOOT_AND_COCK_MOTOR_OFF); // Turn the Motor OFF!
-//    AnalogChannel armPosition;
-//    final int kArmPositionMin = 100;                // Arm in cocked position.
-//    final int kArmPositionMax = 600;                // Arm can exceed this angle!
-
-                    shootTimer.reset();
-                    shootTimer.start();             // Start a timer.
-                    shootNextState = 4;
-                    break;
-                }
-
-                shootNextState = 3;                     // Keep waiting for the arm to compleet shooting.
-                break;
-                
-            // Wait for a bit for the shooting arm to stop moving before reversing direction.
-            case 4:
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1abcd 2 3 4  ";
-
-                if(shootTimer.get() < PAUSE_AFTER_SHOOTING_TIME) { // Check the time.
-                    shootNextState = 4;                 // Keep waiting.
-                    break;
-                }
-
-                shooterMotor.set (SHOOT_AND_COCK_MOTOR_ON_COCK); // Turn the Motor On to Cock the shooter.
-
-                shootNextState = 5;                     // Start cocking t5he arm.
-                break;
-
-            // Complete the re-cocking process.
-            // Keep the motor on until the cocked limit switch is on again.
-
-            case 5:
-                           // 1234567890123456789012
-                shootDiag6 = "State: 0 1abcd 2 3 4 5";
-// TODO - Check logic!
-                if ((shooterMotorEncoder.get () > 0.0d) ||
-                    (shooterCockedLimitSwitch.get() == LIMIT_SWITCH_PRESSED)) {
-                    shooterMotor.set (SHOOT_AND_COCK_MOTOR_OFF); // Turn the Motor OFF!
-
-                    shootTimer.stop();              // No need for the shoot internal timer for a while.
-                    shootTimer.reset();
-
-                    shootTime.stop();               // No need for the shooting process diagnostic timer.
-                    shootTime.reset(); 
-                    shootNextState = 0;             // Shooter reset is complete.
-                    break;                          // Arm is ready to go.
-                }
-
-                shootNextState = 5;                 // Arm not ready.
-                break;
-
-            default:
-                System.out.print ("Shoot unknown state " + StringUtils.format(shootState, 2) + 
-                    " from past state " + StringUtils.format(shootPastState, 2) + StringUtils.TODO_CRLF);
-                shootNextState = 0;
-// TODO - consider calling shootStop.
-                break;            
-
-        } // switch (shootState)  
-
-    } // void shoot()
-    
-    
-    // isBallInShooter
-    // Returns true  if there is a ball load and ready to go in the shooter.
-    // Returns false if there is not a ball in the shooter.
-    boolean isBallInShooter() {
-        return(ballLoadedSensor.getAverageValue() > 110);
-        //Calibration table:
-        // Inches      Reading
-        //  00            5    infinity
-        //  12           50
-        //  10          110
-        //   8          130
-        //   6          150
-        //   4          180
-        //Sharp 2D120XF 5X Infrared DIstance sensor.
-        // See diagnostic 4
-    } // boolean isBallInShooter()
-
-
 
     // Autonomous 0 - Do nothing.
     void autonomousDoNothing() {
@@ -886,174 +654,9 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     // Don't used the camera in this autonomous program.
     // Pick up a ball, move forward, shoot and move forward some more.
     void autonomous2() {
-        double d;
         
-        aState = aStateNext;
+    }
 
-//        autoDiag5 = "Auto " + String.format("%2d", autonomousMode)
-//            + " St " + String.format("%2d", aState)
-//            + " Ps " + String.format("%2d", aStatePast) + "  ";
-
-        switch(aState) {
-
-        // Extend arm and turn on roller motor.   
-        case 0:
-
-            loader.extend();
-
-            shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_SLOW_UP); // Turn on the shooter motor very slowly.
-            shootTimer.reset();                     // We are not shooting. So Steal the shoot timer for a second.
-            aStateNext = 1;
-            break;
-
-        // Lift shooter arm very low power to get it just above the cocked limit switch.
-        case 1:
-            if (shootTimer.get() < 200) {           // Wait for 200 milli-seconds (0.2 seconds).
-                shooterMotor.set (SHOOT_AND_COCK_MOTOR_ON_SLOW_UP);
-                aStateNext = 1;                     // Wait a bit longer.
-                break;
-            }
-
-             // Turn the motor off, time is up.
-            shooterMotor.set(SHOOT_AND_COCK_MOTOR_OFF);// Turn the motor off.
-            shootTimer.reset();                     // Reset the time.
-            shootNextState = 2;                     // Next!
-            
-            shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_COCK); // Turn the motor on to cocking speed.
-            
-            break;
- 
-        // Wait until the shooting arm slowly drops to the cocked limit switch.
-        case 2:
-            if(shooterCockedLimitSwitch.get() == ARM_NOT_COCKED) { // Wait for the limit switch to be pressed.
-                shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_COCK);
-                aStateNext = 2;                     // Wait a bit longer.
-                break;
-            }
-
-             // Turn the motor off, the shooting arm is in the Home position.
-            shooterMotor.set(SHOOT_AND_COCK_MOTOR_OFF);// Turn the motor off.
-            aStateNext = 3;                         // Next.
-            break;
-
-        // Wait for the arm to be extended all of the way.
-        case 3:
-            if(armExtendLimitSwitch.get() == LIMIT_SWITCH_NOT_PRESSED) { // Wait for limit switch press.
-	        //armRetractSolenoid.set(false);   // Keep extending the arm...
-                //armExtendSolenoid.set (true);    // These do not have to be done again.
-                //ballRollerMotor.set(kBallRollerMotorLoadOn);  // Also, turn on the motor to pickup the ball.
-                aStateNext = 3;                     // Wait a bit longer.
-                break;
-            }
-            
-            // The arm is externded all of the way and the roller is moving in the load direction.
-
-            // Next start a move backward 4 feet to pickup a ball.
-            tankDrive.moveDistance(-48 /* inches */, 0.8 /* % max speed */);
-            // Move 72.0 inches, at 0.4 of 1.0 power, and ramp up time is 2 second.
-            aStateNext = 4;                         // Next.
-            break;
-
-        // Move backward 4 feet or until a ball is sensed in the shooter.
-        case 4:
-            // Is there a ball loaded into the shooter?
-            if (isBallInShooter() == BALL_IN_SHOOTER) {
-                // Yes, we have a loaded ball!
-                moveStop();                        // Stop moving, we have the ball
-                loader.retract();
-
-	        // Start moving forward 4 feet plus the distance moved backward.
-                tankDrive.moveDistance(48 /* inches */, 0.8 /* % max speed */);
-                
-                shootNextState = 5;                 // Go wait for the move forward to complete.
-                break;
-            }
-            // A ball is not sensed.
-
-            // Is the move complete?
-             if (!tankDrive.moveDistanceCompleted()) {                 // Is the move complete?
-                // No, so keep on truckin.
-                aStateNext = 4;                     // Keep on roll'in.
-                break;
-            } else {
-                // Start moving forward 4 feet plus the distance moved backward 
-                //plus another 4 feet into the scoring zone.
-                tankDrive.moveDistance(2 * 48 /* inches */, 0.8 /* % max speed */);
-
-                aStateNext = 8;                     // Move is ended and no ball.
-                break;                              // No reason to shoot.
-            }                                       // Jump ahead to move forward to the scoring zone
-
-        // Wait for the move complete.
-        case 5:
-            // Is the move complete?
-             if (!tankDrive.moveDistanceCompleted()) {                 // Is the move complete?
-                // No, so keep on truckin.
-                aStateNext = 5;                     // Keep on roll'in.
-                break;
-            } else {
-                aStateNext = 6;                     // GO and shoot.
-                break;
-            }
-            
-        // Some day, put in code to use the camera to look at the target
-        // to determine the height of the reflective zone and 
-        // convert that to a distance or a power setting.
-        // For now just use a fixed power assuming we are at a hot spot on the floor.
-            
-        // Shoot
-        case 6:
-            shootStart();                           // Start the independant shooting process.
-            aStateNext = 7;                         // Move is ended.
-            break;                                  // Wait till the deal'in's done.
-            
-        // Wait until the ball has been shot.
-        // To determine if the shooting is done look at the shooter motor power.
-        // If the power is positive the arm is throwing the ball.
-        // If the power is negative the arm is being returned to the cocked 
-        // position, and it is now OK to move the robot forward.
-        case 7:
-            if (shooterMotor.get() > 0.0d) {        // Wait till the deal'in's done.
-                aStateNext = 7;                     // Keep waiting.
-                break;                              
-            }
-
-            // Next start a move forward 4 feet into the scoring zone.
-            tankDrive.moveDistance(48 /* inches */, 0.4 /* % max speed */);
-            // Move 48.0 inches, at 0.4 of 1.0 power, and ramp up time is 2 second.
-
-            aStateNext = 8;                         // Move is ended.
-            break;                                  // Wait till the deal'ins done.
-
-        // Drive forward into the scoring zone.
-        // NOTE: You can get here from states 4 or 7.
-        case 8:
-            // Is the move complete?
-             if(!tankDrive.moveDistanceCompleted()) {                  // Is the move complete?
-                // No, so keep on truckin.
-                aStateNext = 5;                     // Keep roll'in.
-                break;
-            } else {
-                aStateNext = 6;                     // Move is ended.
-                break;                              // Go shoot.
-            }
-        
-	// End of Autonomous.
-        case 9:
-            aStateNext = 6;                         // Stay here forever...
-            break;                                  // Or until Autonomous mode ends...
-                                                    // Which ever comes first.
-
-        default:
-            // error message.
-            break;
-        
-        } // Switch (aState) {
-
-    } // autonomous2()   
-
-
-    // autonomous 3
     void autonomous3() {
         // Your autonomous code here.
    
@@ -1214,9 +817,8 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
                 tm = shootTime.get ()/10.0d;                 // Make id 1/1000 to 1/100 of sec.
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter        " + StringUtils.format(tm, 3, 2));
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
-                    "Ball Loaded " + ((isBallInShooter ()) ? "Y " : "N ") 
-                    + StringUtils.format (ballLoadedSensor.getValue(), 6));
-                s = "Ckd " + ((shooterCockedLimitSwitch.get () == ARM_COCKED) ? "Y " : "N ") +
+                    "Ball Loaded " + (shooter.isBallInShooter() ? "Y " : "N "));
+                s = "Ckd " + (shooter.isCocked() ? "Y " : "N ") +
                     "Mn/Mx " + StringUtils.format(ARM_POSITION_MIN, 4) + "/" + StringUtils.format(ARM_POSITION_MAX, 4);
                 dslcd.println(DriverStationLCD.Line.kUser4, 1, s);
                 dslcd.println(DriverStationLCD.Line.kUser5, 1,
@@ -1245,7 +847,7 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
                     + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Drive motor power    ");
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, "Left motor:   " + StringUtils.format ( leftWheelPower, 4, 3));
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Shoot: " + StringUtils.format (shooterMotorEncoder.getDistance(),6, 2));;
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Shoot: " + StringUtils.format (shooter.getShooterRate(),6, 2));;
 //                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Right motor:  " + format (rightWheelPower, 4, 3));
                 dslcd.println(DriverStationLCD.Line.kUser5, 1, "Left:  " + StringUtils.format(tankDrive.getLeftEncoderDistance(),6, 2));
                 dslcd.println(DriverStationLCD.Line.kUser6, 1, "Right: " + StringUtils.format(tankDrive.getRightEncoderDistance(),6, 2));

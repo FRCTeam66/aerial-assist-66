@@ -1,6 +1,7 @@
 package edu.wpi.first.team66;
 
 import edu.wpi.first.team66.params.IOParams;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedController;
 
@@ -12,14 +13,26 @@ public class Loader implements IOParams {
     
     private final SpeedController ballRollerMotor;
     
+    private final DigitalInput armExtendedSwitch;
+    
+    private final DigitalInput armRetractedSwitch;
+    
     private boolean ejecting = false;
     
-    public Loader(Solenoid armRetractSolenoid, Solenoid armExtendSolenoid, SpeedController ballRollerMotor) {
+    public Loader(
+            Solenoid armRetractSolenoid,
+            Solenoid armExtendSolenoid,
+            SpeedController ballRollerMotor,
+            DigitalInput armExtendedSwitch,
+            DigitalInput armRetractedSwitch)
+    {
         this.armExtendSolenoid = armExtendSolenoid;
         this.armRetractSolenoid = armRetractSolenoid;
         this.ballRollerMotor = ballRollerMotor;
+        this.armExtendedSwitch = armExtendedSwitch;
+        this.armRetractedSwitch = armRetractedSwitch;
         
-        ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
+        retract();
     }
     
     public boolean isEjecting() {
@@ -30,8 +43,16 @@ public class Loader implements IOParams {
         return armRetractSolenoid.get();
     }
     
+    public boolean isRetracted() {
+        return armRetractedSwitch.get();
+    }
+    
     public boolean isExtending() {
         return armExtendSolenoid.get();
+    }
+    
+    public boolean isExtended() {
+        return armExtendedSwitch.get();
     }
     
     public double getRollorSpeed() {

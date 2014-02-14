@@ -1,95 +1,172 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package edu.wpi.first.team66;
 
+import edu.wpi.first.team66.params.IOParams;
+import edu.wpi.first.wpilibj.AnalogChannel;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SpeedController;
 
-/**
- * Interface to the shooting mechanism, maintains state to keep
- * system internally consistent and automatically reset after a shot.
- */
-public class Shooter {
+public class Shooter implements IOParams {
+
+    private static final int STATE_INIT = -1;
+    private static final int STATE_COCKED_AND_IDLE = 0;
+    private static final int STATE_PREFIRE_CHECKS = 1;
+    private static final int STATE_CHAMBER_BALL = 2;
+    private static final int STATE_SHOOTING = 3;
+    private static final int STATE_STOPPING = 4;
+    private static final int STATE_RESETTING = 5;
     
-    private static final int
-            READY_STATE = 0,
-            SHOOTING_STATE = 1,
-            RESETTING_STATE = 2;
+    private final SpeedController shooterMotor;
+    private final Encoder shooterMotorEncoder;
+
+    private final AnalogChannel ballLoadedSensor;                 // Used to detect if a ball is in the shooter mechanism.
+
+    private final DigitalInput shooterCockedLimitSwitch;          // Limit Switches.
+    private final DigitalInput shooterShotLimitSwitch;            // Shooter iss moved all the way.
+
+    private final Loader loader;
     
-    private final PIDController pidController;
-    
-    private int currentState;
-    
-    public Shooter(SpeedController motor, Encoder encoder) {
-        // TODO compute initial parameters
-        this.currentState = RESETTING_STATE;
-        this.pidController = new PIDController(0, 1, 1, encoder,
-                new TargetReachedListenerProxy(motor));
-        
+    private int currentState = STATE_INIT;
+
+    public Shooter(
+            SpeedController shooterMotor,
+            Encoder shooterMotorEncoder,
+            AnalogChannel ballLoadedSensor,
+            DigitalInput shooterCockedLimitSwitch,
+            DigitalInput shooterShotLimitSwitch,
+            Loader loader)
+    {
+        this.shooterMotor = shooterMotor;
+        this.shooterMotorEncoder = shooterMotorEncoder;
+        this.ballLoadedSensor = ballLoadedSensor;
+        this.shooterCockedLimitSwitch = shooterCockedLimitSwitch;
+        this.shooterShotLimitSwitch = shooterShotLimitSwitch;
+        this.loader = loader;
     }
     
-    public boolean canShoot() {
-        return currentState == READY_STATE;
+    public boolean isBallInShooter()
+    {
+        return ballLoadedSensor.getAverageValue() > 110;
     }
     
-    public void shoot(double distance, double peak) {
-        if (currentState != READY_STATE) {
-            return;
+    public boolean shoot()
+    {
+        if (currentState == STATE_COCKED_AND_IDLE)
+        {
+            // think about being able to shoot
         }
-        
-        // TODO compute fire parameters
-        /**
-         * If a pidWrite call is made before we set state to
-         * "SHOOTING" it shouldn't break (because we only do
-         * this in the "READY" state, which has no other transition)
-         */
-        pidController.setPID(1, 0.5, -0.5);
-        currentState = SHOOTING_STATE;
+        return false;
+    }
+    
+    public boolean stop()
+    {
+        // TODO try to stop if we aren't committed
+        return false;
+    }
+    
+    public void update(double deltaTime)
+    {
+        switch (currentState) {
+            // Shooting not in process when in this state.
+            case STATE_COCKED_AND_IDLE:
+                break;
+
+            case STATE_PREFIRE_CHECKS:
+
+                // Is the arm cocked and ready to shoot?
+                if (shooterCockedLimitSwitch.get () == ARM_NOT_COCKED) {
+                    break;
+                }
+
+                // Is there a ball in the shooter?
+                if (isBallInShooter () == BALL_NOT_IN_SHOOTER) {
+                    break;
+                }
+
+                // Is the arm in the Extend position?
+                if (!loader.isExtended()) {
+                    loader.extend();
+                    break;
+                }
+                
+                currentState = STATE_SHOOTING;
+                // TODO transition actions
+                
+                break;
+            case STATE_CHAMBER_BALL:
+                if (isBallChambered())
+                {
+                    currentState = STATE_SHOOTING;
+                    break;
+                }
+                break;
+            case STATE_SHOOTING:
+
+                if (isTagetSpeedReached())
+                {
+                    currentState = STATE_STOPPING;
+                }
+                
+                // TODO tune PID controller
+                
+                break;
+                
+            // Stop the shootere motor when either the encoder has travened the desired
+            // distance or the shooterMotorLimitSwith is pressed by thhe arm.
+            case STATE_STOPPING:
+                
+                if (isStopped())
+                {
+                    currentState = STATE_RESETTING;
+                    break;
+                }
+            
+                break;
+                
+            case STATE_RESETTING:
+                
+                if (isInCockedPosition())
+                {
+                    currentState = STATE_COCKED_AND_IDLE;
+                    break;
+                }
+                
+                break;
+        }
+    }
+    
+    public double getShooterRate()
+    {
+        return shooterMotorEncoder.getRate();
+    }
+    
+    public boolean isCocked()
+    {
+        return currentState == STATE_COCKED_AND_IDLE && isInCockedPosition();
+    }
+    
+    private boolean isBallChambered()
+    {
+        return false;
+    }
+    
+    private boolean isTagetSpeedReached()
+    {
+        return false;
+    }
+    
+    private boolean isInCockedPosition()
+    {
+        return false;
     }
     
     /**
-     * Proxies the normal PIDOutput in order to check if the target position
-     * is reached, if so change state and alter PID values.
+     * Arm has been halted
+     * @return 
      */
-    private class TargetReachedListenerProxy implements PIDOutput {
-        
-        private final PIDOutput proxied;
-        
-        public TargetReachedListenerProxy(PIDOutput proxied) {
-            this.proxied = proxied;
-        }
-
-        public void pidWrite(double output) {
-            if (pidController.onTarget()) {
-                
-                /**
-                 * This is depending on the fact that a PIDController
-                 * is running a single thread, otherwise we could set the
-                 * state and get another pidWrite call before we've changed
-                 * the parameters (e.g. we say we're resetting, and the state
-                 * gets checked and found on target before we've told the
-                 * controller about a new target)
-                 */
-                switch (currentState) {
-                    case RESETTING_STATE:
-                        // reset, maintain position
-                        currentState = READY_STATE;
-                    case SHOOTING_STATE:
-                        // shot fired, reset
-                        currentState = RESETTING_STATE;
-                        // TODO compute reset parameters
-                        pidController.setPID(0, 0, 0);
-                    default:
-                }
-            } else {
-                proxied.pidWrite(output);
-            }
-        }
+    private boolean isStopped()
+    {
+        return false;
     }
+    
 }
