@@ -179,47 +179,47 @@ import edu.wpi.first.wpilibj.Timer;
 public class DanMain extends IterativeRobot {
 
     //final int kAIOSolt = 0;                       // Slot number of the Analog IO module
-    final int kDIOSlot = 1;                         // Slot number of the Digital IO module
-    final int kSIOSlot = 2;                         // Slot number of the Solenoid IO module
+    final int DIO_SLOT = 1;                         // Slot number of the Digital IO module
+    final int SIO_SLOT = 2;                         // Slot number of the Solenoid IO module
 
     // PWM IO Channels
-    final int kLeftMotorPWMChannel             = 1; // PWM channel numbers
-    final int kRightMotorPWMChannel            = 2;
-    final int kShooterMotorPWMChannel          = 3;
-    final int kBallRollerMotorPWMChannel       = 4;
+    final int LEFT_MOTOR_PWM_CHANNEL             = 1; // PWM channel numbers
+    final int RIGHT_MOTOR_PWM_CHANNEL            = 2;
+    final int SHOOTER_MOTOR_PWM_CHANNEL          = 3;
+    final int BALL_ROLLER_MOTOR_PWM_CHANNEL       = 4;
 
     // Relay IO Channels
-    final int kCameraLightsRelayRIOChannel     = 1;
-    final int kAirCompressorRelayRIOChannel    = 8;
+    final int CAMERA_LIGHTS_RELAY_RIO_CHANNEL     = 1;
+    final int AIR_COMPRESSOR_RELAY_RIO_CHANNEL    = 8;
     
     // Solenoid IO Channels
-    final int kHighShifterSolenoidSIOChannel   = 1;   // Shift to high gear
-    final int kLowShifterSolenoidSIOChannel    = 2;   // Shift to low  gear
-    final int kArmExtendSolenoid               = 3;   // Arm extend solenoid
-    final int kArmRetractSolenoid              = 4;   // Arm retrace Solenoid
+    final int HIGH_SHIFTER_SOLENOID_SHIFTER_SIO_CHANNEL   = 1;   // Shift to high gear
+    final int LOW_SHIFTER_SOLENOID_SIO_CHANNEL    = 2;   // Shift to low  gear
+    final int ARM_EXTEND_SOLENOID               = 3;   // Arm extend solenoid
+    final int ARM_RETRACT_SOLENOID              = 4;   // Arm retrace Solenoid
 
     // Digital IO Channels
-    final int kLeftWheelEncoderBit0             = 1;
-    final int kLeftWheelEncoderBit1             = 2;
-    final int kRightWheelEncoderBit0            = 3;
-    final int kRightWheelEncoderBit1            = 4;
-    final int kShooterArmEncoderBit0            = 5;
-    final int kShooterArmEncoderBit1            = 6;
-    final int kArmExtendLimitSwitchDIChannel    = 7;  // Digital IO channels for Arm Extend  Limit Switch.
-    final int kArmRetractLimitSwitchDIChannel   = 8;  // Digital IO channels for Arm Retract Limit Switch.
-    final int kShooterCockedLimitSwichDIChannel = 9;  // Digital IO channels for Shooter Cocked Limit Switch.
-    final int kShooterShotLimitSwichDIChannel   = 10; // Digital IO channels for Shooter Shot Limit Switch.
-    final int kNassonPressureSwitchDIChannel    = 11; // Digital IO channels for the Compressor switch.
-    final int kAutonomousBit0DIChannel          = 12; // Digital IO channels for autonomous Bit 0
-    final int kAutonomousBit1DIChannel          = 13; // Digital IO channels for autonomous Bit 1
-    final int kAutonomousBit2DIChannel          = 14; // Digital IO channels for autonomous Bit 2
+    final int LEFT_WHEEL_ENCODER_BIT_0             = 1;
+    final int LEFT_WHEEL_ENCODER_BIT_1             = 2;
+    final int RIGHT_WHEEL_ENCODER_BIT_0            = 3;
+    final int RIGHT_WHEEL_ENCODER_BIT_1            = 4;
+    final int SHOOTER_ARM_ENCODER_BIT_0            = 5;
+    final int SHOOTER_ARM_ENCODER_BIT_1            = 6;
+    final int ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL    = 7;  // Digital IO channels for Arm Extend  Limit Switch.
+    final int ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL   = 8;  // Digital IO channels for Arm Retract Limit Switch.
+    final int SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL = 9;  // Digital IO channels for Shooter Cocked Limit Switch.
+    final int SHOOTER_SHOT_LIMIT_SWITCH_DI_CHANNEL   = 10; // Digital IO channels for Shooter Shot Limit Switch.
+    final int NASSON_PRESSURE_SWITCH_DI_CHANNEL    = 11; // Digital IO channels for the Compressor switch.
+    final int AUTONOMOUS_BIT_0_DI_CHANNEL          = 12; // Digital IO channels for autonomous Bit 0
+    final int AUTONOMOUS_BIT_1_DI_CHANNEL          = 13; // Digital IO channels for autonomous Bit 1
+    final int AUTONOMOUS_BIT_2_DI_CHANNEL          = 14; // Digital IO channels for autonomous Bit 2
     
     // Analog IO Channels
-    final int kGyroAnlogAIChannel               = 1;  // Analog channel for Gyro.
-    final int kBallLoadedSensorAIChannel        = 2;  // For Sharp infrared distance sensor to detect a ball.
-    final int kArmPositionPOTAIChannel          = 3;  // Absolute arm position from an alalon potentiatometer.
-    final int kDiagnosticSelectorAIChannel      = 7;  // Analog IO channels for diagnostics selector.
-    final int kBatteryVoltageAIChannel          = 8;  // Channel allocated by FIRST for battery voltage.
+    final int GYRO_ANALOG_AI_CHANNEL               = 1;  // Analog channel for Gyro.
+    final int BALL_LOADED_SENSOR_AI_CHANNEL        = 2;  // For Sharp infrared distance sensor to detect a ball.
+    final int ARM_POSITION_POT_AI_CHANNEL          = 3;  // Absolute arm position from an alalon potentiatometer.
+    final int DIAGNOSTIC_SELECTOR_AI_CHANNEL      = 7;  // Analog IO channels for diagnostics selector.
+    final int BATTERY_VOLTAGE_AI_CHANNEL          = 8;  // Channel allocated by FIRST for battery voltage.
 
     // Driver Station and Diagnostics Display
     DriverStation ds;                               // Define the drivers station object
@@ -235,14 +235,14 @@ public class DanMain extends IterativeRobot {
     Encoder leftMotorEncoder;
     Encoder rightMotorEncoder;
     Encoder shooterMotorEncoder;
-    final double kEncoderWheelsDistancePerPulse = 0.0075d; // Distance in inches per click
+    final double ENCODER_WHEELS_DISTANCE_PER_PULSE = 0.0075d; // Distance in inches per click
             
-    final double joystickDeadBand = 0.08;           // Joystick deadband for the motors.
+    final double JOYSTICK_DEADBAND = 0.08;           // Joystick deadband for the motors.
    
-    final boolean kTriggerShifterOff = false;       // Trigger is out
-    final boolean kTriggerShifterOn  = true;        // Trigger is depressed
+    final boolean TODO_TRIGGER_SHIFTER_OFF = false;       // Trigger is out
+    final boolean TODO_TRIGGER_SHIFTER_ON  = true;        // Trigger is depressed
 
-    final double kSteeringMotorDeadband = 0.15;     // This amount +/- in the X-axis to drive straight.
+    final double STEERING_MOTOR_DEADBAND = 0.15;     // This amount +/- in the X-axis to drive straight.
     //double driverStickXAxis = 0.0;                // Save this for robot diagnostics
     //double driverStickYAxis = 0.0;
 
@@ -254,17 +254,17 @@ public class DanMain extends IterativeRobot {
 
     // Gyro objects and constants. The Gyro object takes care of everything for us.
     Gyro gyro;                                      // Gyro for autonomous steering.
-    final double kGyroDeadband = 1.5;               // Deadband degrees.
+    final double TODO_GYRO_DEADBAND = 1.5;               // Deadband degrees.
 
     // Driver joystick buttons.
-    final int kDriverShifterTrigger = 1;            // Switch the logical front of the bot for easier steering.
-    final int kDriveSwitchRed   = 4;                // 
-    final int kDriveSwitchWhite = 3;                // 
-    final int kDriveSwitchBlue  = 5;                // 
-    final int kDriveSwitchPoleSeekOff = 6;          // 
-    final int kDriveSwitchPoleSeekOn  = 7;          // 
-    final int kDriveSwitchEmergencyStopClear = 10;  // Continue
-    final int kDriveSwitchEmergencyStopSet = 11;    // Soft eStop
+    final int DRIVER_SHIFTER_TRIGGER = 1;            // Switch the logical front of the bot for easier steering.
+    final int DRIVE_SWITCH_RED   = 4;                // 
+    final int DRIVE_SWITCH_WHITE = 3;                // 
+    final int DRIVE_SWITCH_BLUE  = 5;                // 
+    final int DRIVE_SWITCH_POLE_SEEK_OFF = 6;          // 
+    final int DRIVE_SWITCH_POLE_SEEK_ON  = 7;          // 
+    final int DRIVE_SWITCH_ESTOP_CLEAR = 10;  // Continue
+    final int DRIVE_SWITCH_ESTOP_SET = 11;    // Soft eStop
 
     boolean emergencyStop = false;
 
@@ -284,16 +284,16 @@ public class DanMain extends IterativeRobot {
     DigitalInput autonomousBit1;
     DigitalInput autonomousBit2;
 
-    final int kJoystickArmShootButton        = 1;   // Trigger
-    final int kJoystickArmLightToggle        = 6;   // Camera lights toggle
-    final int kJoystickArmExtendButton       = 9;
-    final int kJoystickArmRetractButton      = 8;
-    final int kJoystickArmEjectButton        = 7;
-    final int kJoystickArmEmergencyStopClear = 10;  // Continue
-    final int kJoystickArmEmergencyStopSet   = 11;  // Soft eStop
+    final int JOYSTICK_ARM_SHOOT_BUTTON        = 1;   // Trigger
+    final int JOYSTICK_ARM_LIGHT_TOGGLE        = 6;   // Camera lights toggle
+    final int JOYSTICK_ARM_EXTEND_BUTTON       = 9;
+    final int JOYSTIC_ARM_RETRACT_BUTTON      = 8;
+    final int JOYSTICK_ARM_EJECT_BUTTON        = 7;
+    final int JOYSTICK_ARM_ESTOP_CLEAR = 10;  // Continue
+    final int JOYSTICK_ARM_ESTOP_SET   = 11;  // Soft eStop
 
-    final boolean kJoystickButtonPressed     = true;  // Joystick button is pressed. VERIFY
-    final boolean kJoystickButtonNotPressed  = false; // Joystick button is NOT pressed. VERIFY
+    final boolean JOYSTICK_BUTTON_PRESSED     = true;  // Joystick button is pressed. VERIFY
+    final boolean JOYSTICK_BUTTON_NOT_PRESSED  = false; // Joystick button is NOT pressed. VERIFY
 
 
     // Ball Roller Motor Declarations and Constants.
@@ -473,28 +473,28 @@ public class DanMain extends IterativeRobot {
 
         // Define the motor speed controllers
       //leftMotor = new Jaguar(kDIOSlot, kLeftMotorPWMChannel);
-        leftMotor = new Victor(kDIOSlot, kLeftMotorPWMChannel);
+        leftMotor = new Victor(DIO_SLOT, LEFT_MOTOR_PWM_CHANNEL);
         
       //rightMotor = new Jaguar(kDIOSlot, kRightMotorPWMChannel);
-        rightMotor = new Victor(kDIOSlot, kRightMotorPWMChannel);
+        rightMotor = new Victor(DIO_SLOT, RIGHT_MOTOR_PWM_CHANNEL);
         
       //shooterMotor = new Jaguar(kDIOSlot, kShooterMotorPWMChannel);
-        shooterMotor = new Victor(kDIOSlot, kShooterMotorPWMChannel);
+        shooterMotor = new Victor(DIO_SLOT, SHOOTER_MOTOR_PWM_CHANNEL);
 
 
         // Define 3 sets of Encoders fir the above motors.
-        leftMotorEncoder     = new Encoder(kDIOSlot, kLeftWheelEncoderBit0,
-                                           kDIOSlot, kLeftWheelEncoderBit1);
-        leftMotorEncoder.setDistancePerPulse(kEncoderWheelsDistancePerPulse);
+        leftMotorEncoder     = new Encoder(DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_0,
+                                           DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_1);
+        leftMotorEncoder.setDistancePerPulse(ENCODER_WHEELS_DISTANCE_PER_PULSE);
         leftMotorEncoder.start();
         
-        rightMotorEncoder    = new Encoder(kDIOSlot, kRightWheelEncoderBit0,
-                                           kDIOSlot, kRightWheelEncoderBit1);
+        rightMotorEncoder    = new Encoder(DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_0,
+                                           DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_1);
         rightMotorEncoder.start();
-        rightMotorEncoder.setDistancePerPulse(kEncoderWheelsDistancePerPulse);
+        rightMotorEncoder.setDistancePerPulse(ENCODER_WHEELS_DISTANCE_PER_PULSE);
 
-        shooterMotorEncoder  = new Encoder(kDIOSlot, kShooterArmEncoderBit0, 
-                                           kDIOSlot, kShooterArmEncoderBit1);
+        shooterMotorEncoder  = new Encoder(DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_0, 
+                                           DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_1);
         shooterMotorEncoder.setDistancePerPulse(kEncoderShooterDistancePerPulse);
         shooterMotorEncoder.start();
 
@@ -504,30 +504,30 @@ public class DanMain extends IterativeRobot {
         //                              kDIOSlot, kSteeringInputBChannel,
         //                              false, CounterBase.EncodingType.k2X); // also EncodingType.k4X_val
 
-        gyro = new Gyro(kGyroAnlogAIChannel);       // Gyro object
+        gyro = new Gyro(GYRO_ANALOG_AI_CHANNEL);       // Gyro object
         gyro.reset();
         
         // Setup the Ball Roller Motor.
-        ballRollerMotor = new Victor (kDIOSlot, kBallRollerMotorPWMChannel);
+        ballRollerMotor = new Victor (DIO_SLOT, BALL_ROLLER_MOTOR_PWM_CHANNEL);
         ballRollerMotor.set (kBallRollerMotorOff);
 
-        armExtendLimitSwitch  = new DigitalInput(kArmExtendLimitSwitchDIChannel);
-        armRetractLimitSwitch = new DigitalInput(kArmRetractLimitSwitchDIChannel);
+        armExtendLimitSwitch  = new DigitalInput(ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL);
+        armRetractLimitSwitch = new DigitalInput(ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL);
         
-        armPosition = new AnalogChannel(kArmPositionPOTAIChannel);
+        armPosition = new AnalogChannel(ARM_POSITION_POT_AI_CHANNEL);
         
         // Shooter stuff.
-        shooterCockedLimitSwitch = new DigitalInput(kShooterCockedLimitSwichDIChannel);
-        shooterShotLimitSwitch   = new DigitalInput(kShooterShotLimitSwichDIChannel);
+        shooterCockedLimitSwitch = new DigitalInput(SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL);
+        shooterShotLimitSwitch   = new DigitalInput(SHOOTER_SHOT_LIMIT_SWITCH_DI_CHANNEL);
         
         // Ball loaded sensor (Sharp infrared distance sensor)
         //ballLoadedSensor = new AnalogChannel(kAIOSolt, kBallLoadedSensorAIChannel);
-        ballLoadedSensor = new AnalogChannel(kBallLoadedSensorAIChannel);
+        ballLoadedSensor = new AnalogChannel(BALL_LOADED_SENSOR_AI_CHANNEL);
 
         // Autonomous stuff...
-        autonomousBit0 = new DigitalInput(kAutonomousBit0DIChannel);
-        autonomousBit1 = new DigitalInput(kAutonomousBit1DIChannel);
-        autonomousBit2 = new DigitalInput(kAutonomousBit2DIChannel);
+        autonomousBit0 = new DigitalInput(AUTONOMOUS_BIT_0_DI_CHANNEL);
+        autonomousBit1 = new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL);
+        autonomousBit2 = new DigitalInput(AUTONOMOUS_BIT_2_DI_CHANNEL);
 
         autonomousMode = ((autonomousBit2.get() == kLimitSwitchPressed) ? 4 : 0) |
                          ((autonomousBit1.get() == kLimitSwitchPressed) ? 2 : 0) |
@@ -535,7 +535,7 @@ public class DanMain extends IterativeRobot {
         System.out.println("Autonomous mode: " + format(autonomousMode, 2));
         // Switches behave just like a limit switch on a Digital IO.
 
-        diagnosticSelector = new AnalogChannel(kDiagnosticSelectorAIChannel);
+        diagnosticSelector = new AnalogChannel(DIAGNOSTIC_SELECTOR_AI_CHANNEL);
         //System.out.println("diagnosticSelector: " + format(diagnosticSelector.getAverageValue (),6, 3));
 
         shootState = shootNextState = shootPastState = 0; // Shooting state machine controls.
@@ -543,17 +543,17 @@ public class DanMain extends IterativeRobot {
 
         aState = aStateNext = aStatePast = 0;       // Autonomous state machine controls.    
 
-        airCompressor = new Compressor(kNassonPressureSwitchDIChannel, kAirCompressorRelayRIOChannel);
+        airCompressor = new Compressor(NASSON_PRESSURE_SWITCH_DI_CHANNEL, AIR_COMPRESSOR_RELAY_RIO_CHANNEL);
         airCompressor.start();                      // Start the air compressor.
 
-        cameraLights = new Relay (kDIOSlot, kCameraLightsRelayRIOChannel, Relay.Direction.kBoth);
+        cameraLights = new Relay (DIO_SLOT, CAMERA_LIGHTS_RELAY_RIO_CHANNEL, Relay.Direction.kBoth);
         cameraLightsOn   = Relay.Value.kForward;
         //cameraLightsOn = Relay.Value.kReverse;
         cameraLightsOff  = Relay.Value.kOff;
         cameraLights.set (cameraLightsOff);         // Set Default value to off.
         cameraLightToggle = false;
 
-        cameraLightsButtonPressed = kJoystickButtonNotPressed;
+        cameraLightsButtonPressed = JOYSTICK_BUTTON_NOT_PRESSED;
         cameraLightsButtonWasPressed = false;
 
         highShifterSolenoid = new Solenoid (1);     // Instantiate the Solenoid objects to control the valves.
@@ -599,18 +599,18 @@ public class DanMain extends IterativeRobot {
         // If in emergence mode, is the emergency clear button pressed?
         // Did someone press the E-stop Clear button?
         if (emergencyStop == true) {
-            if ((driveStickL.getRawButton(kDriveSwitchEmergencyStopClear) == kJoystickButtonPressed) ||
-                (driveStickR.getRawButton(kDriveSwitchEmergencyStopClear) == kJoystickButtonPressed) ||   
-                (armStick.getRawButton   (kDriveSwitchEmergencyStopClear) == kJoystickButtonPressed))   {
+            if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||
+                (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||   
+                (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED))   {
                 emergencyStop = false;              // Clear the emergency stop.
             } else {
                 return;                             // Emergency Stopped. Remain stopped.
             }
         }
         // Did someone press the soft E-stop button?
-        if ((driveStickL.getRawButton(kDriveSwitchEmergencyStopSet) == kJoystickButtonPressed) ||
-            (driveStickR.getRawButton(kDriveSwitchEmergencyStopSet) == kJoystickButtonPressed) ||   
-            (armStick.getRawButton   (kDriveSwitchEmergencyStopSet) == kJoystickButtonPressed))   {
+        if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||
+            (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||   
+            (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
             emergencyStop = true;                   // Set the emergency stop
 
             leftMotor.set(kDriveStop);              // Turn off all motors.
@@ -699,9 +699,9 @@ public class DanMain extends IterativeRobot {
         // If in emergence mode, is the emergency clear button pressed?
         if (emergencyStop == true) {
             // Is the clear button pressed?
-            if ((driveStickL.getRawButton(kDriveSwitchEmergencyStopClear) == kJoystickButtonPressed) ||
-                (driveStickR.getRawButton(kDriveSwitchEmergencyStopClear) == kJoystickButtonPressed) ||   
-                (armStick.getRawButton   (kDriveSwitchEmergencyStopClear) == kJoystickButtonPressed))   {
+            if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||
+                (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||   
+                (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED))   {
                 emergencyStop = false;              // Yes, clear the emergency stop.
             } else {
                 return;                             // No, emergency Stopped.
@@ -709,9 +709,9 @@ public class DanMain extends IterativeRobot {
         }
         // Is the emergence stop joystick button pressed?
 
-        if ((driveStickL.getRawButton(kDriveSwitchEmergencyStopSet) == kJoystickButtonPressed) ||
-            (driveStickR.getRawButton(kDriveSwitchEmergencyStopSet) == kJoystickButtonPressed) ||   
-            (armStick.getRawButton   (kDriveSwitchEmergencyStopSet) == kJoystickButtonPressed))   {
+        if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||
+            (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||   
+            (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
             emergencyStop = true;                  // Yes, set the emergency stop
 
             leftMotor.set (kDriveStop);            // Turn off all motors
@@ -723,8 +723,8 @@ public class DanMain extends IterativeRobot {
         // +T66
         // Driver joysticks.
         // If either trigger is pulled then shift to low speed.
-        i = (driveStickL.getRawButton(kDriverShifterTrigger) ? 2 : 0) +
-            (driveStickR.getRawButton(kDriverShifterTrigger) ? 1 : 0);
+        i = (driveStickL.getRawButton(DRIVER_SHIFTER_TRIGGER) ? 2 : 0) +
+            (driveStickR.getRawButton(DRIVER_SHIFTER_TRIGGER) ? 1 : 0);
         if (i == 0) {                               // Neither trigger button is pressed,
             lowShifterSolenoid.set  (lowShifterHigh); // shift to high speed.
             highShifterSolenoid.set (higherShifterhigh);
@@ -735,12 +735,12 @@ public class DanMain extends IterativeRobot {
 
         // Set the motors speed.
         yl = driveStickL.getY();
-        yl = (Math.abs(yl) < joystickDeadBand) ? 0.0 :yl; // If within in deadband make it 0.
+        yl = (Math.abs(yl) < JOYSTICK_DEADBAND) ? 0.0 :yl; // If within in deadband make it 0.
         leftWheelPower = yl;
         leftMotor.set (yl);
 
         yr = driveStickR.getY();
-        yr = (Math.abs(yr) < joystickDeadBand) ? 0.0 :yr;
+        yr = (Math.abs(yr) < JOYSTICK_DEADBAND) ? 0.0 :yr;
         rightWheelPower =yr;
         rightMotor.set(-yr);
 
@@ -749,7 +749,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         
         // If the Joystick Arm Extend button is pressed, then extend the arm...
         // just the arm extend Solenoid, and set the ball roller motor to Load.
-        if (armStick.getRawButton(kJoystickArmExtendButton) == kJoystickButtonPressed) {
+        if (armStick.getRawButton(JOYSTICK_ARM_EXTEND_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             armRetractSolenoid.set (armRetractSolenoidExtend);
             armExtendSolenoid.set  (armExtendSolenoidExtend); // Extend arm, get it out of way or pickup ball.
             ballRollerMotor.set (kBallRollerMotorLoadOn);     // Also, turn on the motor to pickup the ball.
@@ -761,7 +761,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         //   (otherwise it might eject the ball).
         // This is using an "else if" to handle the situation if both buttons
         //   are pressed at once.
-        else if (armStick.getRawButton (kJoystickArmRetractButton) == kJoystickButtonPressed) {
+        else if (armStick.getRawButton (JOYSTIC_ARM_RETRACT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             ballRollerMotor.set (kBallRollerMotorOff); // Motor off.
             armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm as directed.
             armRetractSolenoid.set (armExtendSolenoidRetract);
@@ -770,7 +770,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
 
         // If the Joystick ball eject button is pressed
         //   then turn on the motor to eject the ball and retract the arm.
-        if (armStick.getRawButton (kJoystickArmEjectButton) == kJoystickButtonPressed) {
+        if (armStick.getRawButton (JOYSTICK_ARM_EJECT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             ballEjectInProcess = true;                         // Remember - in process of ejecting a ball.
             ballRollerMotor.set (kBallRollerMotorEjectOn);
             armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm to get it to touch
@@ -783,7 +783,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         } // if (armStick.getRaw (joyStickArmEjectButton) == kJoystickButtonPressed)
 
         // Is the shotting trigger button pressed?
-        if (armStick.getRawButton (kJoystickArmShootButton) == kJoystickButtonPressed) {
+        if (armStick.getRawButton (JOYSTICK_ARM_SHOOT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             if (shootButtonPressed == false) {      // Yes.  Was the shoot button just pressed?
                 shootButtonPressed = true;          // Yes, set a flag.
                 shootStart ();                      // Fire in the hole!
@@ -798,8 +798,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
         }
 
         // Manualy toggle the camera lights.
-        b = armStick.getRawButton (kJoystickArmLightToggle);
-        if (b != kJoystickButtonPressed) {          // Is the button pressed?
+        b = armStick.getRawButton (JOYSTICK_ARM_LIGHT_TOGGLE);
+        if (b != JOYSTICK_BUTTON_PRESSED) {          // Is the button pressed?
             if (cameraLightsButtonWasPressed == false) {
                 cameraLightsButtonWasPressed = true; // Remember that the button is now pressed in.
                 if (cameraLightToggle) {            // Yes.  Was the shoot button just pressed?
