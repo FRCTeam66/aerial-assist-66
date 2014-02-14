@@ -9,12 +9,12 @@ package edu.wpi.first.team66;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
- *
- * @author pdehaan
+ * Helper class for measuring time deltas. Keeps track of when it's
+ * updated so each call to getDeltaTime() reflects difference since last call.
  */
 public class DeltaTimer {
     
-    double lastCallTime = -1.0;
+    double lastCallTime = Timer.getFPGATimestamp();
     
     public DeltaTimer() {
     }

@@ -178,6 +178,8 @@ import edu.wpi.first.team66.params.IOParams;
  */
 public class DanMain extends IterativeRobot implements IOParams {
 
+    private DeltaTimer periodicTimer = null;
+    
     private TankDrive tankDrive = null;
     
     private Loader loader = null;
@@ -338,7 +340,8 @@ public class DanMain extends IterativeRobot implements IOParams {
      * used for any initialization code.
      */
     public void robotInit() {
-
+        periodicTimer = new DeltaTimer();
+        
         // get the driver station instance to read the digital I/O pins
         ds = DriverStation.getInstance();
         dslcd = DriverStationLCD.getInstance();
@@ -472,9 +475,10 @@ public class DanMain extends IterativeRobot implements IOParams {
 
 
     public void autonomousInit () {
+        periodicTimer.reset();
         timer.start();                              // Start the timer
-
         airCompressor.start();                      // Startthe air compressor.
+        
     } // public void autonomousInit ()
 
     /**
@@ -562,11 +566,14 @@ public class DanMain extends IterativeRobot implements IOParams {
         } // switch (autonomousMode)
 
         shoot ();    // Call this eveny message loop to run the shooting state machine.
+        
+        tankDrive.update(periodicTimer.getDeltaTime());
 
     } // public void autonomousPeriodic()
 
 
     public void teleopInit () {
+        periodicTimer.reset();
         airCompressor.start();                      // Start the air compressor.
     } // public void teleopInit ()
 
@@ -690,7 +697,8 @@ public class DanMain extends IterativeRobot implements IOParams {
         // -T66
 
        shoot ();    // Call this every message loop to run the shooting state machine.
-	
+
+       tankDrive.update(periodicTimer.getDeltaTime());
     } // public void teleopPeriodic()
 
 
