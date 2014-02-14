@@ -298,14 +298,14 @@ public class DanMain extends IterativeRobot {
 
     // Ball Roller Motor Declarations and Constants.
     private Victor ballRollerMotor;
-    private final boolean kLimitSwitchPressed    = true;
-    private final boolean kLimitSwitchNotPressed = false;
+    private final boolean LIMIT_SWITCH_PRESSED    = true;
+    private final boolean LIMIT_SWITCH_NOT_PRESSED = false;
     
     AnalogChannel ballLoadedSensor;                 // Used to detect if a ball is in the shooter mechanism.
      
-    final double kBallRollerMotorLoadOn  = -1.00;   // Speed that the rollers will turn Picking-up a ball.
-    final double kBallRollerMotorEjectOn = 1.00;    // Speed that the rollers will turn Ejecting a ball.
-    final double kBallRollerMotorOff     = 0.00;    // Speed that the rollers will turn Off.
+    final double BALL_ROLLER_MOTOR_LOAD_ON  = -1.00;   // Speed that the rollers will turn Picking-up a ball.
+    final double BALL_ROLLER_MOTOR_EJECT_ON = 1.00;    // Speed that the rollers will turn Ejecting a ball.
+    final double BALL_ROLLER_MOTOR_OFF     = 0.00;    // Speed that the rollers will turn Off.
 
     DigitalInput armExtendLimitSwitch;              // Limit Switches.
     DigitalInput armRetractLimitSwitch;
@@ -317,31 +317,31 @@ public class DanMain extends IterativeRobot {
     final boolean armExtendSolenoidRetract = false;
 
     AnalogChannel armPosition;
-    final int kArmPositionMin = 100;                // Arm in cocked position.
-    final int kArmPositionMax = 600;                // Arm can exceed this angle!
+    final int ARM_POSITION_MIN = 100;                // Arm in cocked position.
+    final int ARM_POSITION_MAX = 600;                // Arm can exceed this angle!
     
     // Shooter stuff...
     DigitalInput shooterCockedLimitSwitch;          // Limit Switches.
     DigitalInput shooterShotLimitSwitch;            // Shooter iss moved all the way.
     
-    final boolean kArmCocked    = kLimitSwitchPressed;    // Limit switch is pressed.
-    final boolean kArmNotCocked = kLimitSwitchNotPressed; // Limit switch is pressed.
+    final boolean ARM_COCKED    = LIMIT_SWITCH_PRESSED;    // Limit switch is pressed.
+    final boolean ARM_NOT_COCKED = LIMIT_SWITCH_NOT_PRESSED; // Limit switch is pressed.
     
-    final boolean kBallInShooter    = true;         // Returned from isBallInShooter Function.
-    final boolean kBallNotInShooter = false;
+    final boolean BALL_IN_SHOOTER    = true;         // Returned from isBallInShooter Function.
+    final boolean BALL_NOT_IN_SHOOTER = false;
     
     boolean ballEjectInProcess = false;             // Remembers if the ball eject button was pressed.
 //    final double kShootAndCockMotorOn  = 1.0;       // This will be controlled in a PID loop.
-    final double kShootAndCockMotorOn  = 0.1;       // This will be controlled in a PID loop.
-    final double kShootAndCockMotorOff = 0.0;
-    final double kShootAndCockMotorOnSlowUp = 0.1;  // For moving the shooter to home position in Autonomous.
-    final double kShootAndCockMotorOnCock   = -0.2; // Shooter cocking speed.
+    final double SHOOT_AND_COCK_MOTOR_ON  = 0.1;       // This will be controlled in a PID loop.
+    final double SHOOT_AND_COCK_MOTOR_OFF = 0.0;
+    final double SHOOT_AND_COCK_MOTOR_ON_SLOW_UP = 0.1;  // For moving the shooter to home position in Autonomous.
+    final double SHOOT_AND_COCK_MOTOR_ON_COCK   = -0.2; // Shooter cocking speed.
 
 // TODO - Find the correct shooter travel distance. This is a SWAG.
-    final double kShooterDistance = 100.0d;         // Number of encoder clicks to move the shooter to fire.
-    final double kPauseAferShootingTime = 500.0d;   // Pause 500 milli-seconds (0.5 sec.) after shooting 
+    final double SHOOTER_DISTANCE = 100.0d;         // Number of encoder clicks to move the shooter to fire.
+    final double PAUSE_AFTER_SHOOTING_TIME = 500.0d;   // Pause 500 milli-seconds (0.5 sec.) after shooting 
                                                     // to let the shooter stop moving.
-    final double kEncoderShooterDistancePerPulse = 1.0d;
+    final double ENCODER_SHOOTER_DISTANCE_PER_PULSE = 1.0d;
 // TODO CALIBRATE if needed
     
     int shootPastState = 0;                         // Shoot Method State Machine state variables.
@@ -363,16 +363,16 @@ public class DanMain extends IterativeRobot {
     //final double kDriveFast = -0.6;               // Drive speed in Autonomous mode for drive motors.
     //final double kDriveSlow = -0.3;               // Turning speed for drive motors. Speeds are negated.
     //final double kDriveTurn = 0.2;                // Steering speed + turn right, - turn left
-    final double kDriveStop = 0.0;                  // Motor stop
+    final double DRIVE_STOP = 0.0;                  // Motor stop
 
     boolean diagOff = false;                        // Flag to display diagnostics-off screen once.
 
-    final String kCrLf = "\n\r\000";                // String Constants.
-    final String kSpaces = "          ";
-    final String kSpaces21 = "                     "; // For diagnostic console.
-    final String kZeros = "0000000000";
-    final String kTrue  = "True ";
-    final String kFalse = "False";
+    final String TODO_CRLF = "\n\r\000";                // String Constants.
+    final String TODO_SPACES = "          ";
+    final String TODO_SPACES_21 = "                     "; // For diagnostic console.
+    final String TODO_ZEROS = "0000000000";
+    final String TODO_TRUE  = "True ";
+    final String TODO_FALSE = "False";
 
     boolean cameraLightsButtonPressed;              // ?
     boolean cameraLightsButtonWasPressed;           // Status of camera lightbutton from previous message.
@@ -401,22 +401,22 @@ public class DanMain extends IterativeRobot {
     double rightWheelPower = 0.0d;                  // Used in diagnostics.
     
     // Move code variables and constants.  ----------------------
-    long Speed;                                     // ??Track robot speed every 26.2 ms.
+    long speed;                                     // ??Track robot speed every 26.2 ms.
 
 // TODO dan get rid of this!
-    boolean OffenseDefense;                         // Which end of the robot is the front.
+    boolean offenseDefense;                         // Which end of the robot is the front.
 
     double degrees;                                 // Yaw rate sensor value in degrees from gyro.getAngele ().
-    double DegreesStart = 0.0d;                     // Starting angle OF THE MOVE SET IN MOVEsTART.
+    double degreesStart = 0.0d;                     // Starting angle OF THE MOVE SET IN MOVEsTART.
 
-    double Distance = 0.0d;
-    double Ramp = 0.0d;
+    double distance = 0.0d;
+    double ramp = 0.0d;
 
     int moveState     = 0;                          // Move state machine states.
     int moveNextState = 0;
     int movePastState = 0;
 
-    double  MaxPower = 1.0;                         // This value is initial power setting.
+    double  maxPower = 1.0;                         // This value is initial power setting.
 
     Timer moveTimer;
     double startTime;                               // Starting time for the move.
@@ -430,12 +430,12 @@ public class DanMain extends IterativeRobot {
 
     // Variable that change depending on Offence or Defence switch.
     // Recall that the robot has two front ends depending on O/D switch.
-    final double kBrakeForce = -0.1;                // 
+    final double BRAKE_FORCE = -0.1;                // 
     double brakeForce = 0.0;
 
-    final double kDegreesMargin = 1.0;              // Allow +/- N degrees variation in the direction.
+    final double DEGREES_MARGIN = 1.0;              // Allow +/- N degrees variation in the direction.
     
-    double Compensation = 0;                        // Amount of wheel power correction is computed 
+    double compensation = 0;                        // Amount of wheel power correction is computed 
     // ----------------------                       // based upon power setting.
     
     /**
@@ -448,15 +448,15 @@ public class DanMain extends IterativeRobot {
         ds = DriverStation.getInstance();
         dslcd = DriverStationLCD.getInstance();
 
-        dslcd.println(DriverStationLCD.Line.kUser1, 1, kSpaces21);
-        dslcd.println(DriverStationLCD.Line.kUser2, 1, kSpaces21);
-        dslcd.println(DriverStationLCD.Line.kUser3, 1, kSpaces21);
-        dslcd.println(DriverStationLCD.Line.kUser4, 1, kSpaces21);
-        dslcd.println(DriverStationLCD.Line.kUser5, 1, kSpaces21);
-        dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);        
+        dslcd.println(DriverStationLCD.Line.kUser1, 1, TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser2, 1, TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
         dslcd.updateLCD();
         
-        shootDiag6 = kSpaces21;
+        shootDiag6 = TODO_SPACES_21;
         shootTime = new Timer();                    // Used for shooting diagnostics.
         shootTime.reset();
         shootTimer = new Timer();                   // Used for various things while shooting.
@@ -495,7 +495,7 @@ public class DanMain extends IterativeRobot {
 
         shooterMotorEncoder  = new Encoder(DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_0, 
                                            DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_1);
-        shooterMotorEncoder.setDistancePerPulse(kEncoderShooterDistancePerPulse);
+        shooterMotorEncoder.setDistancePerPulse(ENCODER_SHOOTER_DISTANCE_PER_PULSE);
         shooterMotorEncoder.start();
 
         // Note "boolean reverseDirection" parameter may be needed to set output of encoders, See JavaDocs.
@@ -509,7 +509,7 @@ public class DanMain extends IterativeRobot {
         
         // Setup the Ball Roller Motor.
         ballRollerMotor = new Victor (DIO_SLOT, BALL_ROLLER_MOTOR_PWM_CHANNEL);
-        ballRollerMotor.set (kBallRollerMotorOff);
+        ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
 
         armExtendLimitSwitch  = new DigitalInput(ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL);
         armRetractLimitSwitch = new DigitalInput(ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL);
@@ -529,9 +529,9 @@ public class DanMain extends IterativeRobot {
         autonomousBit1 = new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL);
         autonomousBit2 = new DigitalInput(AUTONOMOUS_BIT_2_DI_CHANNEL);
 
-        autonomousMode = ((autonomousBit2.get() == kLimitSwitchPressed) ? 4 : 0) |
-                         ((autonomousBit1.get() == kLimitSwitchPressed) ? 2 : 0) |
-                         ((autonomousBit0.get() == kLimitSwitchPressed) ? 1 : 0);
+        autonomousMode = ((autonomousBit2.get() == LIMIT_SWITCH_PRESSED) ? 4 : 0) |
+                         ((autonomousBit1.get() == LIMIT_SWITCH_PRESSED) ? 2 : 0) |
+                         ((autonomousBit0.get() == LIMIT_SWITCH_PRESSED) ? 1 : 0);
         System.out.println("Autonomous mode: " + format(autonomousMode, 2));
         // Switches behave just like a limit switch on a Digital IO.
 
@@ -575,7 +575,7 @@ public class DanMain extends IterativeRobot {
         moveTimer = new Timer ();
         moveTimer.reset ();
 
-        autoDiag5 = kSpaces21;
+        autoDiag5 = TODO_SPACES_21;
     } // public void robotInit()
 
 
@@ -613,9 +613,9 @@ public class DanMain extends IterativeRobot {
             (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
             emergencyStop = true;                   // Set the emergency stop
 
-            leftMotor.set(kDriveStop);              // Turn off all motors.
-            rightMotor.set(kDriveStop);
-            shooterMotor.set(kDriveStop);
+            leftMotor.set(DRIVE_STOP);              // Turn off all motors.
+            rightMotor.set(DRIVE_STOP);
+            shooterMotor.set(DRIVE_STOP);
             return;
         }
 
@@ -714,9 +714,9 @@ public class DanMain extends IterativeRobot {
             (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
             emergencyStop = true;                  // Yes, set the emergency stop
 
-            leftMotor.set (kDriveStop);            // Turn off all motors
-            rightMotor.set(kDriveStop);
-            shooterMotor.set(kDriveStop);
+            leftMotor.set (DRIVE_STOP);            // Turn off all motors
+            rightMotor.set(DRIVE_STOP);
+            shooterMotor.set(DRIVE_STOP);
             return;
         }
 
@@ -752,7 +752,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         if (armStick.getRawButton(JOYSTICK_ARM_EXTEND_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             armRetractSolenoid.set (armRetractSolenoidExtend);
             armExtendSolenoid.set  (armExtendSolenoidExtend); // Extend arm, get it out of way or pickup ball.
-            ballRollerMotor.set (kBallRollerMotorLoadOn);     // Also, turn on the motor to pickup the ball.
+            ballRollerMotor.set (BALL_ROLLER_MOTOR_LOAD_ON);     // Also, turn on the motor to pickup the ball.
             ballEjectInProcess = false;
         } // if (armStick.getRawButton(kJoystickArmExtendButton) == kJoystickButtonPressed)
 
@@ -762,7 +762,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // This is using an "else if" to handle the situation if both buttons
         //   are pressed at once.
         else if (armStick.getRawButton (JOYSTIC_ARM_RETRACT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
-            ballRollerMotor.set (kBallRollerMotorOff); // Motor off.
+            ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF); // Motor off.
             armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm as directed.
             armRetractSolenoid.set (armExtendSolenoidRetract);
             ballEjectInProcess = false;
@@ -772,13 +772,13 @@ shooterMotor.set(armStick.getY() * 0.2d);
         //   then turn on the motor to eject the ball and retract the arm.
         if (armStick.getRawButton (JOYSTICK_ARM_EJECT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
             ballEjectInProcess = true;                         // Remember - in process of ejecting a ball.
-            ballRollerMotor.set (kBallRollerMotorEjectOn);
+            ballRollerMotor.set (BALL_ROLLER_MOTOR_EJECT_ON);
             armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm to get it to touch
             armRetractSolenoid.set (armExtendSolenoidRetract);  // the ball in the shooter to eject it.
         }
         else if (ballEjectInProcess == true) {
             ballEjectInProcess = false;             // Stop the motor!
-            ballRollerMotor.set (kBallRollerMotorOff);
+            ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
             // Leave the roller motor on as long as the Eject button is pressed.
         } // if (armStick.getRaw (joyStickArmEjectButton) == kJoystickButtonPressed)
 
@@ -897,7 +897,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 shootDiag6 = "State: 0 1a           ";
 
                 // Is the arm cocked and ready to shoot?
-                if (shooterCockedLimitSwitch.get () == kArmNotCocked) {
+                if (shooterCockedLimitSwitch.get () == ARM_NOT_COCKED) {
                     shootNextState = 1;             // No. Arm is not ready, try again later.
                     break;
                 }
@@ -906,7 +906,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 shootDiag6 = "State: 0 1ab          ";
 
                 // Is there a ball in the shooter?
-                if (isBallInShooter () == kBallNotInShooter) {
+                if (isBallInShooter () == BALL_NOT_IN_SHOOTER) {
                     shootNextState = 1;             // No, a ball is NOT in the shooter.
                     break;
                 }
@@ -915,10 +915,10 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 shootDiag6 = "State: 0 1abc         ";
 
                 // Is the arm in the Extend position?
-                if (armExtendLimitSwitch.get () == kLimitSwitchNotPressed) {
+                if (armExtendLimitSwitch.get () == LIMIT_SWITCH_NOT_PRESSED) {
                     armRetractSolenoid.set (armRetractSolenoidExtend); // Extend the arm to get it out of the way.
                     armExtendSolenoid.set  (armExtendSolenoidExtend);
-                    ballRollerMotor.set (kBallRollerMotorOff); // Don't pull ball out while shooting.
+                    ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF); // Don't pull ball out while shooting.
                     shootNextState = 1;             // Limit Switch is off! Wait.
                     break;
                 }
@@ -926,7 +926,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
                            // 1234567890123456789012
                 shootDiag6 = "State: 0 1abcd        ";
 
-                ballRollerMotor.set (kBallRollerMotorOff); // Don't pull in a ball while shooting.
+                ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF); // Don't pull in a ball while shooting.
 
                 // Things look good. Fire!
                 shootNextState = 2;
@@ -943,7 +943,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 shooterMotorEncoder.reset();
 
                 // Turn on the shooting motor and keep it on.
-                shooterMotor.set (kShootAndCockMotorOn); // For now use a fist shooting power.
+                shooterMotor.set (SHOOT_AND_COCK_MOTOR_ON); // For now use a fist shooting power.
 
                 shootNextState = 3;                      // Go complete the re-cocking process.
                 break;
@@ -957,9 +957,9 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 shootDiag6 = "State: 0 1abcd 2 3    ";
 
 // TODO Put in angle and power settings based on distance calculated from the camera.
-                if ((shooterMotorEncoder.get() >= kShooterDistance) ||
-                    (shooterShotLimitSwitch.get() == kLimitSwitchPressed)) {
-                    shooterMotor.set(kShootAndCockMotorOff); // Turn the Motor OFF!
+                if ((shooterMotorEncoder.get() >= SHOOTER_DISTANCE) ||
+                    (shooterShotLimitSwitch.get() == LIMIT_SWITCH_PRESSED)) {
+                    shooterMotor.set(SHOOT_AND_COCK_MOTOR_OFF); // Turn the Motor OFF!
 //    AnalogChannel armPosition;
 //    final int kArmPositionMin = 100;                // Arm in cocked position.
 //    final int kArmPositionMax = 600;                // Arm can exceed this angle!
@@ -978,12 +978,12 @@ shooterMotor.set(armStick.getY() * 0.2d);
                            // 1234567890123456789012
                 shootDiag6 = "State: 0 1abcd 2 3 4  ";
 
-                if(shootTimer.get() < kPauseAferShootingTime) { // Check the time.
+                if(shootTimer.get() < PAUSE_AFTER_SHOOTING_TIME) { // Check the time.
                     shootNextState = 4;                 // Keep waiting.
                     break;
                 }
 
-                shooterMotor.set (kShootAndCockMotorOnCock); // Turn the Motor On to Cock the shooter.
+                shooterMotor.set (SHOOT_AND_COCK_MOTOR_ON_COCK); // Turn the Motor On to Cock the shooter.
 
                 shootNextState = 5;                     // Start cocking t5he arm.
                 break;
@@ -996,8 +996,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 shootDiag6 = "State: 0 1abcd 2 3 4 5";
 // TODO - Check logic!
                 if ((shooterMotorEncoder.get () > 0.0d) ||
-                    (shooterCockedLimitSwitch.get() == kLimitSwitchPressed)) {
-                    shooterMotor.set (kShootAndCockMotorOff); // Turn the Motor OFF!
+                    (shooterCockedLimitSwitch.get() == LIMIT_SWITCH_PRESSED)) {
+                    shooterMotor.set (SHOOT_AND_COCK_MOTOR_OFF); // Turn the Motor OFF!
 
                     shootTimer.stop();              // No need for the shoot internal timer for a while.
                     shootTimer.reset();
@@ -1013,7 +1013,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
 
             default:
                 System.out.print ("Shoot unknown state " + format(shootState, 2) + 
-                    " from past state " + format(shootPastState, 2) +kCrLf);
+                    " from past state " + format(shootPastState, 2) +TODO_CRLF);
                 shootNextState = 0;
 // TODO - consider calling shootStop.
                 break;            
@@ -1102,9 +1102,9 @@ shooterMotor.set(armStick.getY() * 0.2d);
             armRetractSolenoid.set(armRetractSolenoidExtend); // Extend the arm to pick up a ball.
             armExtendSolenoid.set (armExtendSolenoidExtend);
 
-            ballRollerMotor.set(kBallRollerMotorLoadOn); // Also, turn on the motor to pickup the ball.
+            ballRollerMotor.set(BALL_ROLLER_MOTOR_LOAD_ON); // Also, turn on the motor to pickup the ball.
 
-            shooterMotor.set(kShootAndCockMotorOnSlowUp); // Turn on the shooter motor very slowly.
+            shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_SLOW_UP); // Turn on the shooter motor very slowly.
             shootTimer.reset();                     // We are not shooting. So Steal the shoot timer for a second.
             aStateNext = 1;
             break;
@@ -1112,36 +1112,36 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // Lift shooter arm very low power to get it just above the cocked limit switch.
         case 1:
             if (shootTimer.get() < 200) {           // Wait for 200 milli-seconds (0.2 seconds).
-                shooterMotor.set (kShootAndCockMotorOnSlowUp);
+                shooterMotor.set (SHOOT_AND_COCK_MOTOR_ON_SLOW_UP);
                 aStateNext = 1;                     // Wait a bit longer.
                 break;
             }
 
              // Turn the motor off, time is up.
-            shooterMotor.set(kShootAndCockMotorOff);// Turn the motor off.
+            shooterMotor.set(SHOOT_AND_COCK_MOTOR_OFF);// Turn the motor off.
             shootTimer.reset();                     // Reset the time.
             shootNextState = 2;                     // Next!
             
-            shooterMotor.set(kShootAndCockMotorOnCock); // Turn the motor on to cocking speed.
+            shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_COCK); // Turn the motor on to cocking speed.
             
             break;
  
         // Wait until the shooting arm slowly drops to the cocked limit switch.
         case 2:
-            if(shooterCockedLimitSwitch.get() == kArmNotCocked) { // Wait for the limit switch to be pressed.
-                shooterMotor.set(kShootAndCockMotorOnCock);
+            if(shooterCockedLimitSwitch.get() == ARM_NOT_COCKED) { // Wait for the limit switch to be pressed.
+                shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_COCK);
                 aStateNext = 2;                     // Wait a bit longer.
                 break;
             }
 
              // Turn the motor off, the shooting arm is in the Home position.
-            shooterMotor.set(kShootAndCockMotorOff);// Turn the motor off.
+            shooterMotor.set(SHOOT_AND_COCK_MOTOR_OFF);// Turn the motor off.
             aStateNext = 3;                         // Next.
             break;
 
         // Wait for the arm to be extended all of the way.
         case 3:
-            if(armExtendLimitSwitch.get() == kLimitSwitchNotPressed) { // Wait for limit switch press.
+            if(armExtendLimitSwitch.get() == LIMIT_SWITCH_NOT_PRESSED) { // Wait for limit switch press.
 	        //armRetractSolenoid.set(false);   // Keep extending the arm...
                 //armExtendSolenoid.set (true);    // These do not have to be done again.
                 //ballRollerMotor.set(kBallRollerMotorLoadOn);  // Also, turn on the motor to pickup the ball.
@@ -1160,10 +1160,10 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // Move backward 4 feet or until a ball is sensed in the shooter.
         case 4:
             // Is there a ball loaded into the shooter?
-            if (isBallInShooter() == kBallInShooter) {
+            if (isBallInShooter() == BALL_IN_SHOOTER) {
                 // Yes, we have a loaded ball!
                 moveStop();                        // Stop moving, we have the ball
-                ballRollerMotor.set(kBallRollerMotorOff);
+                ballRollerMotor.set(BALL_ROLLER_MOTOR_OFF);
 
                 armRetractSolenoid.set(armRetractSolenoidRetract); // Retract the arm...
                 armExtendSolenoid.set (armExtendSolenoidRetract);
@@ -1306,7 +1306,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         String s;
 
         s = String.valueOf(i);
-        s = kSpaces + s.trim();
+        s = TODO_SPACES + s.trim();
         return s.substring(s.length() - w + 1);
     } // private String format(int
 
@@ -1314,7 +1314,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         String s;
 
         s = String.valueOf(l);
-        s = kSpaces + s.trim();
+        s = TODO_SPACES + s.trim();
         return s.substring(s.length() - w + 1);
     } // private String format(long
 
@@ -1330,7 +1330,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         if (f < 0) {
             s = "-" + s;
         }
-        s = kSpaces + s;
+        s = TODO_SPACES + s;
         s = s.substring(s.length() - w);
 
         l = (long) ((ff - (double) l) * pow10(d));  // Make the fraction an integer.
@@ -1338,7 +1338,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         while (t.length() < d) {
             t = "0" + t;
         }
-        t = t.trim() + kZeros;
+        t = t.trim() + TODO_ZEROS;
         t = t.substring(0, d);
 
         return s + "." + t;
@@ -1356,7 +1356,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         if (f < 0) {
             s = "-" + s;
         }
-        s = kSpaces + s;
+        s = TODO_SPACES + s;
         s = s.substring(s.length() - w);
 
         l = (long) ((ff - (double) l) * pow10(d));  // Make the fraction an integer.
@@ -1364,7 +1364,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         while (t.length() < d) {
             t = "0" + t;
         }
-        t = t.trim() + kZeros;
+        t = t.trim() + TODO_ZEROS;
         t = t.substring(0, d);
 
         return s + "." + t;
@@ -1372,9 +1372,9 @@ shooterMotor.set(armStick.getY() * 0.2d);
 
     private String format(boolean b) {
         if (b) {
-            return kTrue;
+            return TODO_TRUE;
         } else {
-            return kFalse;
+            return TODO_FALSE;
         }
     } // private String format(int
 
@@ -1396,62 +1396,62 @@ shooterMotor.set(armStick.getY() * 0.2d);
     // Ramp is the ramp time to get to the maximum power. Use a long ramp time for slow short moves.
     //  Never use a ramp time less than 1/4 second because it will make the wheels spin.
     void moveStart (double distance, double maxpower, double ramp) {
-        Distance = distance;                        // Save the parameters in inches.
-        Ramp = ramp;                                // Time in seconds for ramp.
+        this.distance = distance;                        // Save the parameters in inches.
+        this.ramp = ramp;                                // Time in seconds for ramp.
 
-        MaxPower = maxpower;
-        if (MaxPower < 0.0) MaxPower = 0.0;         // Keep it within limits of 0.0 to 1.0.
-        if (MaxPower > 1.0) MaxPower = 1.0;
+        maxPower = maxpower;
+        if (maxPower < 0.0) maxPower = 0.0;         // Keep it within limits of 0.0 to 1.0.
+        if (maxPower > 1.0) maxPower = 1.0;
 
         // Compute all of the necessary motor values for Offence vs Defence vs positive vs negative moves.
-        if (OffenseDefense == true) {	// When in Offence...
-            if (Distance >= 0) {
+        if (offenseDefense == true) {	// When in Offence...
+            if (this.distance >= 0) {
     //printf ("Dist OFF Pos %ld  %ld \n\r", Distance, distance);
-                leftPowerMax  = MaxPower;
-                rightPowerMax = MaxPower;
+                leftPowerMax  = maxPower;
+                rightPowerMax = maxPower;
 
-                Compensation = MaxPower / 2.0;
-                brakeForce = kBrakeForce;
+                compensation = maxPower / 2.0;
+                brakeForce = BRAKE_FORCE;
             }
             else {
     //printf ("Dist OFF Neg %ld  %ld \n\r", Distance, distance);
-                leftPowerMax  = MaxPower;
-                rightPowerMax = MaxPower;
+                leftPowerMax  = maxPower;
+                rightPowerMax = maxPower;
 
-                Compensation = MaxPower / 2.0;
-                brakeForce = -kBrakeForce;
+                compensation = maxPower / 2.0;
+                brakeForce = -BRAKE_FORCE;
             }
 
-            MaxPower = -MaxPower;                   // Don't know why! Used by Ramp.
+            maxPower = -maxPower;                   // Don't know why! Used by Ramp.
     //printf ("MOVE OFFENSE L %3u R %3u C %3u B %3u \n\r", (unsigned char) LeftPowerMax, (unsigned char) RightPowerMax, Compensation, PWM_Brake_Power);
         }
         else {                                      // When in Defence...
-            if (Distance >= 0) {
+            if (this.distance >= 0) {
     //printf ("Dist DEF Pos %d  %d \n\r", Distance, distance);
-                leftPowerMax  = MaxPower;
-                rightPowerMax = MaxPower;
+                leftPowerMax  = maxPower;
+                rightPowerMax = maxPower;
 
-                Compensation = MaxPower / 2.0;
-                brakeForce = kBrakeForce;
+                compensation = maxPower / 2.0;
+                brakeForce = BRAKE_FORCE;
             }
             else {
     //printf ("Dist DEF Neg %d  %d \n\r", Distance, distance);
-                leftPowerMax  = MaxPower;
-                rightPowerMax = MaxPower;
+                leftPowerMax  = maxPower;
+                rightPowerMax = maxPower;
 
-                Compensation = MaxPower / 2.0;
-                brakeForce = -kBrakeForce;
+                compensation = maxPower / 2.0;
+                brakeForce = -BRAKE_FORCE;
             }
     //printf ("MOVE DEFENSE L %3u R %3u C %3u B %3u \n\r", (unsigned char) LeftPowerMax, (unsigned char) RightPowerMax, Compensation, PWM_Brake_Power);
         }
 
         startTime = moveTimer.get ();                           // Absolute start time of move.
 
-        endDistanceLeft  = leftMotorEncoder.getDistance () + Distance; // Ending position.
-        endDistanceRight = leftMotorEncoder.getDistance () + Distance; // Used in motor power adjustment calculations.
+        endDistanceLeft  = leftMotorEncoder.getDistance () + this.distance; // Ending position.
+        endDistanceRight = leftMotorEncoder.getDistance () + this.distance; // Used in motor power adjustment calculations.
 
         degrees = gyro.getAngle ();                 // Get the current angle as the starting angle.
-        DegreesStart = degrees;                     // Starting move state.
+        degreesStart = degrees;                     // Starting move state.
 
     } // Move_Start
 
@@ -1500,8 +1500,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
     //printf ("Braking from state 1.\n\r");
     //printf ("L %5ld  R %5ld   Speed %5d  Brakedist %5ld \n\r", l, r, (int) Speed, BrakeDistance ());
                     // Apply brakes in the opposite direction.
-                    leftMotor.set  (kBrakeForce);
-                    rightMotor.set (kBrakeForce);
+                    leftMotor.set  (BRAKE_FORCE);
+                    rightMotor.set (BRAKE_FORCE);
 
                     moveNextState = 3;  // Begin braking!
                     break;
@@ -1509,11 +1509,11 @@ shooterMotor.set(armStick.getY() * 0.2d);
 
                  // Have you ramped for long enough?
                  // Don't do any straightening in ramp up time.
-                 if ((startTime + Ramp) < moveTimer.get ()) {
+                 if ((startTime + ramp) < moveTimer.get ()) {
                      // No keep on ramp'n by adjusting the ramp up power.
 
-                    leftMotor.set  (rampup (MaxPower, Distance, startTime, Ramp)); // Set the motors to ramp up.
-                    rightMotor.set (rampup (MaxPower, Distance, startTime, Ramp));
+                    leftMotor.set  (rampup (maxPower, distance, startTime, ramp)); // Set the motors to ramp up.
+                    rightMotor.set (rampup (maxPower, distance, startTime, ramp));
 
     //t1 = LEFT_WHEEL_MOTOR;
     //t2 = RIGHT_WHEEL_MOTOR;
@@ -1540,8 +1540,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
     //printf ("Braking from state 2.\n\r");
     //printf ("L %5ld  R %5ld   Speed %5d  Bkakedist %5ld \n\r", l, r, (int) Speed, BrakeDistance ());
                     // Apply brakes in the opposite direction.
-                    leftMotor.set  (kDriveStop);    // Stop.
-                    rightMotor.set (kDriveStop);
+                    leftMotor.set  (DRIVE_STOP);    // Stop.
+                    rightMotor.set (DRIVE_STOP);
     //printf ("PWMs  %d  %d \n\r", LEFT_WHEEL_MOTOR, RIGHT_WHEEL_MOTOR);
     //l = GetLeftDistance ();	// How much further to go?
     //r = GetRightDistance ();
@@ -1555,32 +1555,32 @@ shooterMotor.set(armStick.getY() * 0.2d);
                         ll = leftPowerMax;          // When within +/- margins
                         rr = rightPowerMax;
 
-                        if ((gyro.getAngle() - DegreesStart) > kDegreesMargin) {
-                            if (OffenseDefense) {
-                                if (Distance >= 0)
-                                    rr = Compensation;
+                        if ((gyro.getAngle() - degreesStart) > DEGREES_MARGIN) {
+                            if (offenseDefense) {
+                                if (distance >= 0)
+                                    rr = compensation;
                                 else
-                                    ll = Compensation;
+                                    ll = compensation;
                             }
                             else {
-                                if (Distance >= 0)
-                                    ll = Compensation;
+                                if (distance >= 0)
+                                    ll = compensation;
                                 else
-                                    rr = Compensation;
+                                    rr = compensation;
                             }
                         }
-                        else if ((degrees + DegreesStart) < kDegreesMargin) {
-                            if (OffenseDefense) {
-                                if (Distance >= 0)
-                                    ll = Compensation;
+                        else if ((degrees + degreesStart) < DEGREES_MARGIN) {
+                            if (offenseDefense) {
+                                if (distance >= 0)
+                                    ll = compensation;
                                 else
-                                    rr = Compensation;
+                                    rr = compensation;
                             }
                             else {
-                                if (Distance >= 0)
-                                    rr = Compensation;
+                                if (distance >= 0)
+                                    rr = compensation;
                                 else
-                                    ll = Compensation;
+                                    ll = compensation;
                             }
                         }
 
@@ -1600,9 +1600,9 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 // In the last 26.2 ms has the robot travelled less than 100 APUs?
                 if (tflg) {
     //printf ("Braking PWMs  %d  %d  Speed %d\n\r", LEFT_WHEEL_MOTOR, RIGHT_WHEEL_MOTOR, (int) Speed);
-                    if (Speed <= 5) {
-                        leftMotor.set  (kDriveStop); //Stop.
-                        rightMotor.set (kDriveStop);
+                    if (speed <= 5) {
+                        leftMotor.set  (DRIVE_STOP); //Stop.
+                        rightMotor.set (DRIVE_STOP);
 
     //l = EndDistanceLeft  - GetLeftDistance ();    // How much further to go?
     //r = EndDistanceRight - GetRightDistance ();
@@ -1645,8 +1645,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
         moveNextState = 3;
 
         // Apply brakes.
-        leftMotor.set  (kDriveStop);                // Stop.
-        rightMotor.set (kDriveStop);
+        leftMotor.set  (DRIVE_STOP);                // Stop.
+        rightMotor.set (DRIVE_STOP);
 
     } // Move_Stop ()
 
@@ -1695,7 +1695,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
     //printf ("    BrakeDistance  Speed %5d  Brake distance %5d \n\r", (int) Speed, (int) l);
 
     //	return ((Speed * STOP_DISTANCE) / 1341);    // Compute the stopping distance.
-            return (Speed * 12);                    // Compute the stopping distance.
+            return (speed * 12);                    // Compute the stopping distance.
     } // BrakeDistance ()
 
 
@@ -1728,10 +1728,10 @@ shooterMotor.set(armStick.getY() * 0.2d);
                     dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2)
 				  + " " + format (diagnosticSelector.getValue(),5));
                     dslcd.println(DriverStationLCD.Line.kUser2, 1, "Diagnostics Off       ");
-                    dslcd.println(DriverStationLCD.Line.kUser3, 1, kSpaces21);
-                    dslcd.println(DriverStationLCD.Line.kUser4, 1, kSpaces21);
-                    dslcd.println(DriverStationLCD.Line.kUser5, 1, kSpaces21);
-                    dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);
+                    dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);
                 } // if (diagOff != false;
                 break;
 
@@ -1847,8 +1847,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
                     "Ball Loaded " + ((isBallInShooter ()) ? "Y " : "N ") 
                     + format (ballLoadedSensor.getValue(), 6));
-                s = "Ckd " + ((shooterCockedLimitSwitch.get () == kArmCocked) ? "Y " : "N ") +
-                    "Mn/Mx " + format(kArmPositionMin, 4) + "/" + format(kArmPositionMax, 4);
+                s = "Ckd " + ((shooterCockedLimitSwitch.get () == ARM_COCKED) ? "Y " : "N ") +
+                    "Mn/Mx " + format(ARM_POSITION_MIN, 4) + "/" + format(ARM_POSITION_MAX, 4);
                 dslcd.println(DriverStationLCD.Line.kUser4, 1, s);
                 dslcd.println(DriverStationLCD.Line.kUser5, 1,
                    "Arm Position " + format(armPosition.getValue(), 3) + "     ");
@@ -1862,11 +1862,11 @@ shooterMotor.set(armStick.getY() * 0.2d);
                     + " " + format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter 2      " + format(tm, 3, 2));
                 dslcd.println(DriverStationLCD.Line.kUser3, 1,
-                    "Arm Ext LS " + ((armExtendLimitSwitch.get()==kLimitSwitchPressed) ? "P" : "_") + "         ");
+                    "Arm Ext LS " + ((armExtendLimitSwitch.get()==LIMIT_SWITCH_PRESSED) ? "P" : "_") + "         ");
                 dslcd.println(DriverStationLCD.Line.kUser4, 1,
-                    "Arm Ret LS " + ((armRetractLimitSwitch.get()==kLimitSwitchPressed) ? "P" : "_") + "         ");
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, kSpaces21);        
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);
+                    "Arm Ret LS " + ((armRetractLimitSwitch.get()==LIMIT_SWITCH_PRESSED) ? "P" : "_") + "         ");
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);        
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);
                 diagOff = false;
                 break;
 
@@ -1892,9 +1892,9 @@ shooterMotor.set(armStick.getY() * 0.2d);
 //                s = "Gyro " + String.format("%f3.2", gyro.getAngle());
                 s = "Gyro " + format(gyro.getAngle(),3,2);
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, s);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);        
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
                 diagOff = false;
                 break;
 
@@ -1904,16 +1904,16 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) + " " 
                     + format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Ball pickup arm      ");
-                s =      "Ext LS "  + ((armExtendLimitSwitch.get () == kLimitSwitchNotPressed) ? "P" : "_");
-                s = s + " Ret LS " + ((armRetractLimitSwitch.get() == kLimitSwitchNotPressed) ? "P" : "_");
+                s =      "Ext LS "  + ((armExtendLimitSwitch.get () == LIMIT_SWITCH_NOT_PRESSED) ? "P" : "_");
+                s = s + " Ret LS " + ((armRetractLimitSwitch.get() == LIMIT_SWITCH_NOT_PRESSED) ? "P" : "_");
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, s);
                 dslcd.println(DriverStationLCD.Line.kUser4, 1,
-                    "Ext Sol " + ((armRetractSolenoid.get() == kLimitSwitchNotPressed) ? "N" : "F")
-                 + " Ret Sol " + ((armRetractSolenoid.get() == kLimitSwitchNotPressed) ? "N" : "F"));
+                    "Ext Sol " + ((armRetractSolenoid.get() == LIMIT_SWITCH_NOT_PRESSED) ? "N" : "F")
+                 + " Ret Sol " + ((armRetractSolenoid.get() == LIMIT_SWITCH_NOT_PRESSED) ? "N" : "F"));
                     // "N" = "oN",  "F" = "oFf".
                 dslcd.println(DriverStationLCD.Line.kUser5, 1,
                      "Roller Motor " + format(ballRollerMotor.get(), 3,1));
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);        
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
                 diagOff = false;
                 break;
 
@@ -1921,9 +1921,9 @@ shooterMotor.set(armStick.getY() * 0.2d);
             case 9:
                 dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
                     + " " + format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser3, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, kSpaces21);
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
                 dslcd.println(DriverStationLCD.Line.kUser5, 1, autoDiag5);
                 dslcd.println(DriverStationLCD.Line.kUser6, 1, shootDiag6); // Use text from shoot function.
                 diagOff = false;
@@ -1947,10 +1947,10 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 dslcd.println(DriverStationLCD.Line.kUser1, 1, "Diag:" + format (d, 3) + " Bad Selection");
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "T66 - Flyers  " + format (d, 2)
                     + " " + format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser3, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);        
+                dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
                 diagOff = false;
                 break;
             }  //switch ()
