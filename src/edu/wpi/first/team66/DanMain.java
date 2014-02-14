@@ -142,7 +142,6 @@
 package edu.wpi.first.team66;
 
 import java.lang.String;
-import java.util.*;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 
@@ -160,7 +159,6 @@ import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Joystick;
 
@@ -168,6 +166,7 @@ import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.team66.params.IOParams;
+import edu.wpi.first.team66.params.StateParams;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -176,7 +175,7 @@ import edu.wpi.first.team66.params.IOParams;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class DanMain extends IterativeRobot implements IOParams {
+public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
     private DeltaTimer periodicTimer = null;
     
@@ -214,7 +213,7 @@ public class DanMain extends IterativeRobot implements IOParams {
     // Time of autonomous or telop modes
     Timer timer = new Timer();
 
-    int autonomousMode = 0;                         // Mode is a number between 0 and 7.
+    private int autonomousMode = 0;                         // Mode is a number between 0 and 7.
     double autonomousStopTime = 0.0;                // Used as safety time in autonomous.
 
     DigitalInput autonomousBit0;                    // Digital input objects
@@ -414,9 +413,9 @@ public class DanMain extends IterativeRobot implements IOParams {
         autonomousBit1 = new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL);
         autonomousBit2 = new DigitalInput(AUTONOMOUS_BIT_2_DI_CHANNEL);
 
-        autonomousMode = ((autonomousBit2.get() == LIMIT_SWITCH_PRESSED) ? 4 : 0) |
-                         ((autonomousBit1.get() == LIMIT_SWITCH_PRESSED) ? 2 : 0) |
-                         ((autonomousBit0.get() == LIMIT_SWITCH_PRESSED) ? 1 : 0);
+        autonomousMode = ((autonomousBit2.get()) ? 4 : 0) |
+                         ((autonomousBit1.get()) ? 2 : 0) |
+                         ((autonomousBit0.get()) ? 1 : 0);
         System.out.println("Autonomous mode: " + StringUtils.format(autonomousMode, 2));
         // Switches behave just like a limit switch on a Digital IO.
 
@@ -486,43 +485,23 @@ public class DanMain extends IterativeRobot implements IOParams {
         switch (autonomousMode) {
 
             // Autonomous 0 - Do nothing.
-            case 0:
-                autonomous0();
+            case AMODE_DO_NOTHING:
+                autonomousDoNothing();
                 break;
 
             // Autonomous 1 - Drive forward.
-            case 1:
+            case AMODE_DRIVE_FORWARD:
                 autonomous1();
                 break;
 
             // Autonomous 2 - Shoot the ball at the goal that you are aimed at, then move ahead.
-            case 2:
+            case AMODE_SHOOT_THEN_MOVE:
                 autonomous2();
                 break;
 
             // Autonomous 3 - Look for the illuminated goal with the camera, turn, shoot, turn, drive forward.
-            case 3:
+            case AMODE_AIM_SHOOT_DRIVE_FORWARD:
                 autonomous3();
-                break;
-
-            // TBD
-            case 4:
-                autonomous4();
-                break;
-
-            // TBD
-            case 5:
-                autonomous5();
-                break;
-
-            // TBD
-            case 6:
-                autonomous6();
-                break;
-
-            // TBD
-            case 7:
-                autonomous7();
                 break;
 
             default:
@@ -864,7 +843,7 @@ public class DanMain extends IterativeRobot implements IOParams {
 
 
     // Autonomous 0 - Do nothing.
-    void autonomous0() {
+    void autonomousDoNothing() {
         // Your autonomous code here.
     } // autonomous0()
 
@@ -1078,37 +1057,7 @@ public class DanMain extends IterativeRobot implements IOParams {
     void autonomous3() {
         // Your autonomous code here.
    
-    } // autonomous3()    
-
-    
-    // autonomous 4
-    void autonomous4() {
-        // Your autonomous code here.
-   
-    } // autonomous4()    
-
-    
-    // autonomous 5
-    void autonomous5() {
-        // Your autonomous code here.
-   
-    } // autonomous5()    
-    
-    
-    // autonomous 6
-    void autonomous6() {
-        // Your autonomous code here.
-   
-    } // autonomous6()    
-
-    
-    // autonomous 7
-    void autonomous7() {
-        // Your autonomous code here.
-   
-    } // autonomous()    
-
-
+    } // autonomous3()
 
     // Stop the robot NOW!
     // Just tell the state machine to end the move.
