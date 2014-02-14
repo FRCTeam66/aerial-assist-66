@@ -205,8 +205,6 @@ public class DanMain extends IterativeRobot implements IOParams {
     // Gyro objects and constants. The Gyro object takes care of everything for us.
     Gyro gyro;                                      // Gyro for autonomous steering.
 
-    boolean emergencyStop = false;
-
     // Diagnostic selector is a linear variable Pot
     // If not connected an analog input port returns a vlalue of < 0
     // Take the value from .get() and divide it by 107.
@@ -356,8 +354,6 @@ public class DanMain extends IterativeRobot implements IOParams {
 
         //enhancedIO = DriverStation.getInstance().getEnhancedIO(); // Just in case the Cypress is used.
 
-        emergencyStop = false;
-
         // Define joysticks being used at USB port #1 and USB port #2 on the Drivers Station
         driveStickL = new Joystick(1);
         driveStickR = new Joystick(2);
@@ -483,30 +479,6 @@ public class DanMain extends IterativeRobot implements IOParams {
         // This function will decide what to do.
         displayDiagnostics ();
 
-        // Emergency shut down mode works with DRIVER joystick buttons 10 and 11.
-        // This works like a latch.  Once stopped it must be cleared.
-        // If in emergence mode, is the emergency clear button pressed?
-        // Did someone press the E-stop Clear button?
-        if (emergencyStop == true) {
-            if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||
-                (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||   
-                (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED))   {
-                emergencyStop = false;              // Clear the emergency stop.
-            } else {
-                return;                             // Emergency Stopped. Remain stopped.
-            }
-        }
-        // Did someone press the soft E-stop button?
-        if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||
-            (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||   
-            (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
-            emergencyStop = true;                   // Set the emergency stop
-
-            tankDrive.stop();
-            shooterMotor.set(DRIVE_STOP);
-            return;
-        }
-
         aStatePast = aState;                        // Save the past state.
         aState = aStateNext;                        // Set the new state.
 
@@ -584,31 +556,6 @@ public class DanMain extends IterativeRobot implements IOParams {
         // Call the diagnostic display functions.
         // This function will decide what to do.
         displayDiagnostics ();
-
-        // Emergency shut down mode works with DRIVER joystick buttons 10 and 11.
-        // This works like a latch.  Once stopped it must be cleared.
-        // If in emergence mode, is the emergency clear button pressed?
-        if (emergencyStop == true) {
-            // Is the clear button pressed?
-            if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||
-                (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED) ||   
-                (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_CLEAR) == JOYSTICK_BUTTON_PRESSED))   {
-                emergencyStop = false;              // Yes, clear the emergency stop.
-            } else {
-                return;                             // No, emergency Stopped.
-            }
-        }
-        // Is the emergence stop joystick button pressed?
-
-        if ((driveStickL.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||
-            (driveStickR.getRawButton(DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED) ||   
-            (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
-            emergencyStop = true;                  // Yes, set the emergency stop
-
-            tankDrive.stop();
-            shooterMotor.set(DRIVE_STOP);
-            return;
-        }
 
         // +T66
         // Driver joysticks.

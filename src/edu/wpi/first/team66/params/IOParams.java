@@ -70,9 +70,7 @@ public interface IOParams {
     static final int DRIVE_SWITCH_WHITE = 3;                // 
     static final int DRIVE_SWITCH_BLUE  = 5;                // 
     static final int DRIVE_SWITCH_POLE_SEEK_OFF = 6;          // 
-    static final int DRIVE_SWITCH_POLE_SEEK_ON  = 7;          // 
-    static final int DRIVE_SWITCH_ESTOP_CLEAR = 10;  // Continue
-    static final int DRIVE_SWITCH_ESTOP_SET = 11;    // Soft eStop
+    static final int DRIVE_SWITCH_POLE_SEEK_ON  = 7;          //
     
     // IMU
     static final double TODO_GYRO_DEADBAND = 1.5;               // Deadband degrees.
@@ -83,8 +81,6 @@ public interface IOParams {
     static final int JOYSTICK_ARM_EXTEND_BUTTON       = 9;
     static final int JOYSTIC_ARM_RETRACT_BUTTON      = 8;
     static final int JOYSTICK_ARM_EJECT_BUTTON        = 7;
-    static final int JOYSTICK_ARM_ESTOP_CLEAR = 10;  // Continue
-    static final int JOYSTICK_ARM_ESTOP_SET   = 11;  // Soft eStop
 
     static final boolean JOYSTICK_BUTTON_PRESSED     = true;  // Joystick button is pressed. VERIFY
     static final boolean JOYSTICK_BUTTON_NOT_PRESSED  = false; // Joystick button is NOT pressed. VERIFY
