@@ -178,20 +178,17 @@ import edu.wpi.first.team66.params.IOParams;
  */
 public class DanMain extends IterativeRobot implements IOParams {
 
+    private TankDrive tankDrive = null;
+    
+    private Loader loader = null;
+    
     
     // Driver Station and Diagnostics Display
     DriverStation ds;                               // Define the drivers station object
     DriverStationLCD dslcd;
     Hand hand;                                      // Required for the trigger function
 
-    // Drive motor & encoders.
-    SpeedController leftMotor;
-    SpeedController rightMotor;
-
     SpeedController shooterMotor;
-    
-    Encoder leftMotorEncoder;
-    Encoder rightMotorEncoder;
     Encoder shooterMotorEncoder;
     
     //double driverStickXAxis = 0.0;                // Save this for robot diagnostics
@@ -225,7 +222,6 @@ public class DanMain extends IterativeRobot implements IOParams {
     DigitalInput autonomousBit2;
 
     // Ball Roller Motor Declarations and Constants.
-    private Victor ballRollerMotor;
     
     AnalogChannel ballLoadedSensor;                 // Used to detect if a ball is in the shooter mechanism.
      
@@ -240,19 +236,10 @@ public class DanMain extends IterativeRobot implements IOParams {
     // Shooter stuff...
     DigitalInput shooterCockedLimitSwitch;          // Limit Switches.
     DigitalInput shooterShotLimitSwitch;            // Shooter iss moved all the way.
-    
-    boolean ballEjectInProcess = false;             // Remembers if the ball eject button was pressed.
 //    final double kShootAndCockMotorOn  = 1.0;       // This will be controlled in a PID loop.
-    final double SHOOT_AND_COCK_MOTOR_ON  = 0.1;       // This will be controlled in a PID loop.
-    final double SHOOT_AND_COCK_MOTOR_OFF = 0.0;
-    final double SHOOT_AND_COCK_MOTOR_ON_SLOW_UP = 0.1;  // For moving the shooter to home position in Autonomous.
-    final double SHOOT_AND_COCK_MOTOR_ON_COCK   = -0.2; // Shooter cocking speed.
 
-// TODO - Find the correct shooter travel distance. This is a SWAG.
-    final double SHOOTER_DISTANCE = 100.0d;         // Number of encoder clicks to move the shooter to fire.
-    final double PAUSE_AFTER_SHOOTING_TIME = 500.0d;   // Pause 500 milli-seconds (0.5 sec.) after shooting 
-                                                    // to let the shooter stop moving.
-    final double ENCODER_SHOOTER_DISTANCE_PER_PULSE = 1.0d;
+
+
 // TODO CALIBRATE if needed
     
     int shootPastState = 0;                         // Shoot Method State Machine state variables.
@@ -292,9 +279,6 @@ public class DanMain extends IterativeRobot implements IOParams {
 
     Solenoid highShifterSolenoid;
     Solenoid  lowShifterSolenoid;
-
-    Solenoid armExtendSolenoid;
-    Solenoid armRetractSolenoid;
 
     final boolean lowShifterHigh    = false; // To shift high gear
     final boolean higherShifterhigh = true;
@@ -382,27 +366,22 @@ public class DanMain extends IterativeRobot implements IOParams {
         driveStickR = new Joystick(2);
         armStick    = new Joystick(3);
 
-        // Define the motor speed controllers
-      //leftMotor = new Jaguar(kDIOSlot, kLeftMotorPWMChannel);
-        leftMotor = new Victor(DIO_SLOT, LEFT_MOTOR_PWM_CHANNEL);
+        // Setup tank drive
+        Encoder leftMotorEncoder     = new Encoder(DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_0,
+                                           DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_1);
         
-      //rightMotor = new Jaguar(kDIOSlot, kRightMotorPWMChannel);
-        rightMotor = new Victor(DIO_SLOT, RIGHT_MOTOR_PWM_CHANNEL);
+        
+        Encoder rightMotorEncoder    = new Encoder(DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_0,
+                                           DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_1);
+        
+        tankDrive = new TankDrive(
+            new Victor(DIO_SLOT, LEFT_MOTOR_PWM_CHANNEL),
+            new Victor(DIO_SLOT, RIGHT_MOTOR_PWM_CHANNEL),
+            leftMotorEncoder,
+            rightMotorEncoder);
         
       //shooterMotor = new Jaguar(kDIOSlot, kShooterMotorPWMChannel);
         shooterMotor = new Victor(DIO_SLOT, SHOOTER_MOTOR_PWM_CHANNEL);
-
-
-        // Define 3 sets of Encoders fir the above motors.
-        leftMotorEncoder     = new Encoder(DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_0,
-                                           DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_1);
-        leftMotorEncoder.setDistancePerPulse(ENCODER_WHEELS_DISTANCE_PER_PULSE);
-        leftMotorEncoder.start();
-        
-        rightMotorEncoder    = new Encoder(DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_0,
-                                           DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_1);
-        rightMotorEncoder.start();
-        rightMotorEncoder.setDistancePerPulse(ENCODER_WHEELS_DISTANCE_PER_PULSE);
 
         shooterMotorEncoder  = new Encoder(DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_0, 
                                            DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_1);
@@ -419,9 +398,11 @@ public class DanMain extends IterativeRobot implements IOParams {
         gyro.reset();
         
         // Setup the Ball Roller Motor.
-        ballRollerMotor = new Victor (DIO_SLOT, BALL_ROLLER_MOTOR_PWM_CHANNEL);
-        ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
-
+        loader = new Loader(
+                new Solenoid(ARM_RETRACT_SOLENOID),
+                new Solenoid(ARM_EXTEND_SOLENOID),
+                new Victor(DIO_SLOT, BALL_ROLLER_MOTOR_PWM_CHANNEL));
+        
         armExtendLimitSwitch  = new DigitalInput(ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL);
         armRetractLimitSwitch = new DigitalInput(ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL);
         
@@ -473,8 +454,7 @@ public class DanMain extends IterativeRobot implements IOParams {
         lowShifterSolenoid.set  (lowShifterHigh);    // Initially set it to high gear.
         highShifterSolenoid.set (higherShifterhigh); // Initially set it to high gear.
 
-        armExtendSolenoid   = new Solenoid (3);
-        armRetractSolenoid  = new Solenoid (4);
+        
 
         // Do not mess with the pneumatics here. Leave it alone. 
         //armExtendSolenoid.set  (false);           // Initially set it to arm retracted.
@@ -524,8 +504,7 @@ public class DanMain extends IterativeRobot implements IOParams {
             (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
             emergencyStop = true;                   // Set the emergency stop
 
-            leftMotor.set(DRIVE_STOP);              // Turn off all motors.
-            rightMotor.set(DRIVE_STOP);
+            tankDrive.stop();
             shooterMotor.set(DRIVE_STOP);
             return;
         }
@@ -625,8 +604,7 @@ public class DanMain extends IterativeRobot implements IOParams {
             (armStick.getRawButton   (DRIVE_SWITCH_ESTOP_SET) == JOYSTICK_BUTTON_PRESSED))   {
             emergencyStop = true;                  // Yes, set the emergency stop
 
-            leftMotor.set (DRIVE_STOP);            // Turn off all motors
-            rightMotor.set(DRIVE_STOP);
+            tankDrive.stop();
             shooterMotor.set(DRIVE_STOP);
             return;
         }
@@ -647,24 +625,16 @@ public class DanMain extends IterativeRobot implements IOParams {
         // Set the motors speed.
         yl = driveStickL.getY();
         yl = (Math.abs(yl) < JOYSTICK_DEADBAND) ? 0.0 :yl; // If within in deadband make it 0.
-        leftWheelPower = yl;
-        leftMotor.set (yl);
 
         yr = driveStickR.getY();
         yr = (Math.abs(yr) < JOYSTICK_DEADBAND) ? 0.0 :yr;
-        rightWheelPower =yr;
-        rightMotor.set(-yr);
+        
+        tankDrive.setTargetSpeed(yl, yr);
 
-shooterMotor.set(armStick.getY() * 0.2d);
-        
-        
         // If the Joystick Arm Extend button is pressed, then extend the arm...
         // just the arm extend Solenoid, and set the ball roller motor to Load.
         if (armStick.getRawButton(JOYSTICK_ARM_EXTEND_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
-            armRetractSolenoid.set (armRetractSolenoidExtend);
-            armExtendSolenoid.set  (armExtendSolenoidExtend); // Extend arm, get it out of way or pickup ball.
-            ballRollerMotor.set (BALL_ROLLER_MOTOR_LOAD_ON);     // Also, turn on the motor to pickup the ball.
-            ballEjectInProcess = false;
+            loader.extend();
         } // if (armStick.getRawButton(kJoystickArmExtendButton) == kJoystickButtonPressed)
 
         // If the Joystick Arm Retract button is pressed, then retract the arm...
@@ -673,23 +643,16 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // This is using an "else if" to handle the situation if both buttons
         //   are pressed at once.
         else if (armStick.getRawButton (JOYSTIC_ARM_RETRACT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
-            ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF); // Motor off.
-            armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm as directed.
-            armRetractSolenoid.set (armExtendSolenoidRetract);
-            ballEjectInProcess = false;
+            loader.retract();
         } // else if (armStick.getRaw (kJoyStickArmRetractButton) == kJoystickButtonPressed)
 
         // If the Joystick ball eject button is pressed
         //   then turn on the motor to eject the ball and retract the arm.
         if (armStick.getRawButton (JOYSTICK_ARM_EJECT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
-            ballEjectInProcess = true;                         // Remember - in process of ejecting a ball.
-            ballRollerMotor.set (BALL_ROLLER_MOTOR_EJECT_ON);
-            armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm to get it to touch
-            armRetractSolenoid.set (armExtendSolenoidRetract);  // the ball in the shooter to eject it.
+            loader.eject();
         }
-        else if (ballEjectInProcess == true) {
-            ballEjectInProcess = false;             // Stop the motor!
-            ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
+        else if (loader.isEjecting()) {
+            loader.stopEjecting();
             // Leave the roller motor on as long as the Eject button is pressed.
         } // if (armStick.getRaw (joyStickArmEjectButton) == kJoystickButtonPressed)
 
@@ -827,9 +790,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
 
                 // Is the arm in the Extend position?
                 if (armExtendLimitSwitch.get () == LIMIT_SWITCH_NOT_PRESSED) {
-                    armRetractSolenoid.set (armRetractSolenoidExtend); // Extend the arm to get it out of the way.
-                    armExtendSolenoid.set  (armExtendSolenoidExtend);
-                    ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF); // Don't pull ball out while shooting.
+                    loader.eject();
                     shootNextState = 1;             // Limit Switch is off! Wait.
                     break;
                 }
@@ -837,7 +798,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
                            // 1234567890123456789012
                 shootDiag6 = "State: 0 1abcd        ";
 
-                ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF); // Don't pull in a ball while shooting.
+                loader.stopEjecting();
 
                 // Things look good. Fire!
                 shootNextState = 2;
@@ -966,13 +927,13 @@ shooterMotor.set(armStick.getY() * 0.2d);
         switch(aState) {
         
         case 0:
-            moveStart(72.0, 0.8, 1.0);              // Start moving 6 feet forward.
+            tankDrive.moveDistance(72, 0.8);
             // Move 72.0 inches, at 0.8 of 1.0 power, and ramp up time is 1 second.
             aStateNext = 1;
             break;
 
         case 1:
-            if (move()) {                           // Is the move complete?
+            if (tankDrive.moveDistanceCompleted()) {  // Is the move complete?
                 aStateNext = 2;                     // Yes.
                 break;
             } else {
@@ -1010,10 +971,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // Extend arm and turn on roller motor.   
         case 0:
 
-            armRetractSolenoid.set(armRetractSolenoidExtend); // Extend the arm to pick up a ball.
-            armExtendSolenoid.set (armExtendSolenoidExtend);
-
-            ballRollerMotor.set(BALL_ROLLER_MOTOR_LOAD_ON); // Also, turn on the motor to pickup the ball.
+            loader.extend();
 
             shooterMotor.set(SHOOT_AND_COCK_MOTOR_ON_SLOW_UP); // Turn on the shooter motor very slowly.
             shootTimer.reset();                     // We are not shooting. So Steal the shoot timer for a second.
@@ -1063,7 +1021,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
             // The arm is externded all of the way and the roller is moving in the load direction.
 
             // Next start a move backward 4 feet to pickup a ball.
-            moveStart(-48.0, 0.4, 2.0);             // Start moving 6 feet forward.
+            tankDrive.moveDistance(-48 /* inches */, 0.8 /* % max speed */);
             // Move 72.0 inches, at 0.4 of 1.0 power, and ramp up time is 2 second.
             aStateNext = 4;                         // Next.
             break;
@@ -1074,33 +1032,25 @@ shooterMotor.set(armStick.getY() * 0.2d);
             if (isBallInShooter() == BALL_IN_SHOOTER) {
                 // Yes, we have a loaded ball!
                 moveStop();                        // Stop moving, we have the ball
-                ballRollerMotor.set(BALL_ROLLER_MOTOR_OFF);
-
-                armRetractSolenoid.set(armRetractSolenoidRetract); // Retract the arm...
-                armExtendSolenoid.set (armExtendSolenoidRetract);
+                loader.retract();
 
 	        // Start moving forward 4 feet plus the distance moved backward.
-                d = ((leftMotorEncoder.getDistance () + rightMotorEncoder.getDistance ()) / 2.0d) + 48.0d;
-
-                moveStart(d, 0.8d, 1.0d);            // Start moving 4 feet forward.
-                // Move 72.0 inches, at 0.8 of 1.0 power, and ramp up time is 1 second.
+                tankDrive.moveDistance(48 /* inches */, 0.8 /* % max speed */);
+                
                 shootNextState = 5;                 // Go wait for the move forward to complete.
                 break;
             }
             // A ball is not sensed.
 
             // Is the move complete?
-             if (move() == false) {                 // Is the move complete?
+             if (!tankDrive.moveDistanceCompleted()) {                 // Is the move complete?
                 // No, so keep on truckin.
                 aStateNext = 4;                     // Keep on roll'in.
                 break;
             } else {
                 // Start moving forward 4 feet plus the distance moved backward 
                 //plus another 4 feet into the scoring zone.
-                d = 48.0d + ((leftMotorEncoder.getDistance() 
-                  + rightMotorEncoder.getDistance()) / 2.0d) + 48.0d;
-                
-                moveStart(d, 0.8, 1.0);            // Start moving forward.
+                tankDrive.moveDistance(2 * 48 /* inches */, 0.8 /* % max speed */);
 
                 aStateNext = 8;                     // Move is ended and no ball.
                 break;                              // No reason to shoot.
@@ -1109,7 +1059,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // Wait for the move complete.
         case 5:
             // Is the move complete?
-             if (move() == false) {                 // Is the move complete?
+             if (!tankDrive.moveDistanceCompleted()) {                 // Is the move complete?
                 // No, so keep on truckin.
                 aStateNext = 5;                     // Keep on roll'in.
                 break;
@@ -1141,8 +1091,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
             }
 
             // Next start a move forward 4 feet into the scoring zone.
-            d = 48.0d;                              // Move forward 4 feet more.
-            moveStart(d, 0.4d, 2.0d);               // Start moving 6 feet forward.
+            tankDrive.moveDistance(48 /* inches */, 0.4 /* % max speed */);
             // Move 48.0 inches, at 0.4 of 1.0 power, and ramp up time is 2 second.
 
             aStateNext = 8;                         // Move is ended.
@@ -1152,7 +1101,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         // NOTE: You can get here from states 4 or 7.
         case 8:
             // Is the move complete?
-             if(move() == false) {                  // Is the move complete?
+             if(!tankDrive.moveDistanceCompleted()) {                  // Is the move complete?
                 // No, so keep on truckin.
                 aStateNext = 5;                     // Keep roll'in.
                 break;
@@ -1298,256 +1247,6 @@ shooterMotor.set(armStick.getY() * 0.2d);
     }
 
 
-    // Functions Move and Move_Start cause the robot to move straight either forward or backward.
-    // Distance is how far in inches to move; the direction is controlled by the sign of 
-    //  the distance which can be either positive or negative.
-    // MaxPower is the maximum power to one or both motors in the range of 0.0 to 1.0.  It will be
-    //  continuously adjusted to get it to the specified ending distance. One motor will always be 
-    //  at the MaxPower and the other may be lowered a bit. Power is always positive.
-    // Ramp is the ramp time to get to the maximum power. Use a long ramp time for slow short moves.
-    //  Never use a ramp time less than 1/4 second because it will make the wheels spin.
-    void moveStart (double distance, double maxpower, double ramp) {
-        this.distance = distance;                        // Save the parameters in inches.
-        this.ramp = ramp;                                // Time in seconds for ramp.
-
-        maxPower = maxpower;
-        if (maxPower < 0.0) maxPower = 0.0;         // Keep it within limits of 0.0 to 1.0.
-        if (maxPower > 1.0) maxPower = 1.0;
-
-        // Compute all of the necessary motor values for Offence vs Defence vs positive vs negative moves.
-        if (offenseDefense == true) {	// When in Offence...
-            if (this.distance >= 0) {
-    //printf ("Dist OFF Pos %ld  %ld \n\r", Distance, distance);
-                leftPowerMax  = maxPower;
-                rightPowerMax = maxPower;
-
-                compensation = maxPower / 2.0;
-                brakeForce = BRAKE_FORCE;
-            }
-            else {
-    //printf ("Dist OFF Neg %ld  %ld \n\r", Distance, distance);
-                leftPowerMax  = maxPower;
-                rightPowerMax = maxPower;
-
-                compensation = maxPower / 2.0;
-                brakeForce = -BRAKE_FORCE;
-            }
-
-            maxPower = -maxPower;                   // Don't know why! Used by Ramp.
-    //printf ("MOVE OFFENSE L %3u R %3u C %3u B %3u \n\r", (unsigned char) LeftPowerMax, (unsigned char) RightPowerMax, Compensation, PWM_Brake_Power);
-        }
-        else {                                      // When in Defence...
-            if (this.distance >= 0) {
-    //printf ("Dist DEF Pos %d  %d \n\r", Distance, distance);
-                leftPowerMax  = maxPower;
-                rightPowerMax = maxPower;
-
-                compensation = maxPower / 2.0;
-                brakeForce = BRAKE_FORCE;
-            }
-            else {
-    //printf ("Dist DEF Neg %d  %d \n\r", Distance, distance);
-                leftPowerMax  = maxPower;
-                rightPowerMax = maxPower;
-
-                compensation = maxPower / 2.0;
-                brakeForce = -BRAKE_FORCE;
-            }
-    //printf ("MOVE DEFENSE L %3u R %3u C %3u B %3u \n\r", (unsigned char) LeftPowerMax, (unsigned char) RightPowerMax, Compensation, PWM_Brake_Power);
-        }
-
-        startTime = moveTimer.get ();                           // Absolute start time of move.
-
-        endDistanceLeft  = leftMotorEncoder.getDistance () + this.distance; // Ending position.
-        endDistanceRight = leftMotorEncoder.getDistance () + this.distance; // Used in motor power adjustment calculations.
-
-        degrees = gyro.getAngle ();                 // Get the current angle as the starting angle.
-        degreesStart = degrees;                     // Starting move state.
-
-    } // Move_Start
-
-
-
-
-
-    // Function to determine when the move is complete.
-    // true  = move is complete.
-    // false = move still in process.
-    boolean move () {
-        boolean returnValue;
-        double l, r;
-        double ll, rr;
-        boolean tflg;
-
-
-        returnValue = false;                        // Assume the move is not complete yet. 
-
-        // Is this the next message from the Field Control System (26.2 ms).
-        if (tm != moveTimer.get()) {                
-            tm =  moveTimer.get();
-            tflg = true;
-        } else {
-            tflg = false;
-        }
-
-    //    if (moveNextState != movePastState) {	// For testing.
-    //    	printf ("    In Move   State %d \n\r", next_state);
-    //    }
-        movePastState = moveNextState;
-
-        switch (moveNextState) {
-
-            // Ramp Up. Stay in this state for the ramp up time or until the braking distance.
-            case 1 :
-
-                // Have you travelled far enough at this speed to brake in a safe distance?
-                // Compute the average distance remaining to go.
-                l = endDistanceLeft - leftMotorEncoder.getDistance ();
-    //printf ("l %d  get_LeftWheel %d  StartDistance %d\n\r", (int) 1, (int) get_LeftWheelDistance (), (int) StartDistanceLeft);
-                r = endDistanceRight - rightMotorEncoder.getDistance ();
-                            // Is distance to go less than the braking distance?
-    //printf ("brakeDistance = %d  l %d r %d\n\r", (int) BrakeDistance (), (int) l, (int) r);
-                if (Math.abs(l + r) <= (2 * BrakeDistance ())) {
-    //printf ("Braking from state 1.\n\r");
-    //printf ("L %5ld  R %5ld   Speed %5d  Brakedist %5ld \n\r", l, r, (int) Speed, BrakeDistance ());
-                    // Apply brakes in the opposite direction.
-                    leftMotor.set  (BRAKE_FORCE);
-                    rightMotor.set (BRAKE_FORCE);
-
-                    moveNextState = 3;  // Begin braking!
-                    break;
-                 }
-
-                 // Have you ramped for long enough?
-                 // Don't do any straightening in ramp up time.
-                 if ((startTime + ramp) < moveTimer.get ()) {
-                     // No keep on ramp'n by adjusting the ramp up power.
-
-                    leftMotor.set  (rampup (maxPower, distance, startTime, ramp)); // Set the motors to ramp up.
-                    rightMotor.set (rampup (maxPower, distance, startTime, ramp));
-
-    //t1 = LEFT_WHEEL_MOTOR;
-    //t2 = RIGHT_WHEEL_MOTOR;
-    //t = time;
-    //if (tflg) printf ("     PWM  %5d  %5d  Time %5d\n\r", (int) t1, (int) t2, (int) t);
-
-                     moveNextState = 1;
-                 }
-                 else {
-    //printf ("    Time is up! Full power Scotty.\n\r");
-                     leftMotor.set  (leftPowerMax);
-                     rightMotor.set (rightPowerMax);
-
-                     moveNextState = 2;             // Ramp up time is complete.
-                 }
-                 break;
-
-            case 2:
-
-                // Is distance to go less than the braking distance?
-                l = endDistanceLeft  - leftMotorEncoder.getDistance  (); // How much further to go?
-                r = endDistanceRight - rightMotorEncoder.getDistance ();
-                if (Math.abs(l + r) <= (2 * BrakeDistance ())) {
-    //printf ("Braking from state 2.\n\r");
-    //printf ("L %5ld  R %5ld   Speed %5d  Bkakedist %5ld \n\r", l, r, (int) Speed, BrakeDistance ());
-                    // Apply brakes in the opposite direction.
-                    leftMotor.set  (DRIVE_STOP);    // Stop.
-                    rightMotor.set (DRIVE_STOP);
-    //printf ("PWMs  %d  %d \n\r", LEFT_WHEEL_MOTOR, RIGHT_WHEEL_MOTOR);
-    //l = GetLeftDistance ();	// How much further to go?
-    //r = GetRightDistance ();
-    //printf ("There! L %5ld  R %5ld   \n\r", l, r);
-                    moveNextState = 3;              // Begin braking!
-                    // Fall through to state 3 and start braking.
-                }
-                else {
-                    // Maintain full (max) power, or adjust if off course a fixed power setting.
-                    if (tflg) {
-                        ll = leftPowerMax;          // When within +/- margins
-                        rr = rightPowerMax;
-
-                        if ((gyro.getAngle() - degreesStart) > DEGREES_MARGIN) {
-                            if (offenseDefense) {
-                                if (distance >= 0)
-                                    rr = compensation;
-                                else
-                                    ll = compensation;
-                            }
-                            else {
-                                if (distance >= 0)
-                                    ll = compensation;
-                                else
-                                    rr = compensation;
-                            }
-                        }
-                        else if ((degrees + degreesStart) < DEGREES_MARGIN) {
-                            if (offenseDefense) {
-                                if (distance >= 0)
-                                    ll = compensation;
-                                else
-                                    rr = compensation;
-                            }
-                            else {
-                                if (distance >= 0)
-                                    rr = compensation;
-                                else
-                                    ll = compensation;
-                            }
-                        }
-
-                        leftMotor.set  (ll);
-                        rightMotor.set (rr);
-    //printf ("Degrees  %3d  PWM Values %3u  %3u \n\r", degrees, LEFT_WHEEL_MOTOR, RIGHT_WHEEL_MOTOR);
-                    } // if (tflg) 
-
-                    moveNextState = 2;	
-                    break;
-                }
-
-
-            // Brake to a stop.
-            case 3: 
-
-                // In the last 26.2 ms has the robot travelled less than 100 APUs?
-                if (tflg) {
-    //printf ("Braking PWMs  %d  %d  Speed %d\n\r", LEFT_WHEEL_MOTOR, RIGHT_WHEEL_MOTOR, (int) Speed);
-                    if (speed <= 5) {
-                        leftMotor.set  (DRIVE_STOP); //Stop.
-                        rightMotor.set (DRIVE_STOP);
-
-    //l = EndDistanceLeft  - GetLeftDistance ();    // How much further to go?
-    //r = EndDistanceRight - GetRightDistance ();
-    //l = GetLeftDistance ();	// How much further to go?
-    //r = GetRightDistance ();
-    //printf ("Stopped! L %5ld  R %5ld   \n\r", l, r);
-    //printf ("Distance %ld \n\r", Distance);
-                        moveNextState = 1;
-                        returnValue = true;         // The move is complete!
-                    } // if (Speed <=               // The main application will stop calling Move now.
-                } // if (tflg)
-                break;
-
-
-    //case 4:
-    // Test functions...
-    //LEFT_WHEEL_MOTOR  = rampup (LeftPower,  Distance, StartTime, Ramp);
-    //RIGHT_WHEEL_MOTOR = rampup (RightPower, Distance, StartTime, Ramp);
-    //printf ("LWM  %3u   RWM %3u   %5lu  \n\r", LEFT_WHEEL_MOTOR, RIGHT_WHEEL_MOTOR, time);
-    //break;
-
-    //Speed = Speed + 50;
-    //printf ("Brake Dist %4ld \n\r", BrakeDistance ());
-            default :
-                System.out.println ("Unknown state in Move %d\n\r" + format (moveNextState, 3));
-                break;
-
-        } // Switch (next_state)
-
-        return returnValue;                         // Not done yet chucko.
-    } // Move ()
-
-
-
     // Stop the robot NOW!
     // Just tell the state machine to end the move.
     void moveStop () {
@@ -1556,8 +1255,7 @@ shooterMotor.set(armStick.getY() * 0.2d);
         moveNextState = 3;
 
         // Apply brakes.
-        leftMotor.set  (DRIVE_STOP);                // Stop.
-        rightMotor.set (DRIVE_STOP);
+        tankDrive.stop();
 
     } // Move_Stop ()
 
@@ -1586,33 +1284,6 @@ shooterMotor.set(armStick.getY() * 0.2d);
             return max;                             // Beyond ramp time just use the maximum.
         } // if ((start + ramptime) < moveTimer.get ())
     } // rampup ()
-
-
-    // Function: BrakeDistance ()
-    // Return the distance in APUs (or clicks) that the robot would take at this speed to stop.
-    //
-    // Assume: Maximum Speed is (about) 50 In/Sec or 51,200 APU/Sec. (50 * 1024) 
-    //         Or 51,200 / 26.2 ms = 1341 APUs per clock tick Maximum speed
-    // Assume: It takes 2 Seconds to stop from full speed or 2 * 1341 = 2682 APUs.
-    //
-    // So: Compute the linear stop time based upon the robots current speed.
-    // (Speed * 100) / 1341 which is the % of the max speed the robot is going.
-    // % of max speed * distance to stop from full speed in APUs is the required stop distance.  
-    // (Speed * 100 * STOP_DISTANCE) / 1341 = distance required to stop.
-
-    long BrakeDistance () {
-    //long l;
-    ///l = (Speed * STOP_DISTANCE) / 1341;
-    //printf ("    BrakeDistance  Speed %5d  Brake distance %5d \n\r", (int) Speed, (int) l);
-
-    //	return ((Speed * STOP_DISTANCE) / 1341);    // Compute the stopping distance.
-            return (speed * 12);                    // Compute the stopping distance.
-    } // BrakeDistance ()
-
-
-    // Turn.c  insert code here.
-
-
 
     void displayDiagnostics () {
         int d;                                     // Which diagnostic to run.
@@ -1789,8 +1460,8 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, "Left motor:   " + format ( leftWheelPower, 4, 3));
                 dslcd.println(DriverStationLCD.Line.kUser4, 1, "Shoot: " + format (shooterMotorEncoder.getDistance(),6, 2));;
 //                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Right motor:  " + format (rightWheelPower, 4, 3));
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, "Left:  " + format(leftMotorEncoder.getDistance(),6, 2));
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, "Right: " + format(rightMotorEncoder.getDistance(),6, 2));
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, "Left:  " + format(tankDrive.getLeftEncoderDistance(),6, 2));
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, "Right: " + format(tankDrive.getRightEncoderDistance(),6, 2));
                 diagOff = false;
                 break;
 
@@ -1819,11 +1490,11 @@ shooterMotor.set(armStick.getY() * 0.2d);
                 s = s + " Ret LS " + ((armRetractLimitSwitch.get() == LIMIT_SWITCH_NOT_PRESSED) ? "P" : "_");
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, s);
                 dslcd.println(DriverStationLCD.Line.kUser4, 1,
-                    "Ext Sol " + ((armRetractSolenoid.get() == LIMIT_SWITCH_NOT_PRESSED) ? "N" : "F")
-                 + " Ret Sol " + ((armRetractSolenoid.get() == LIMIT_SWITCH_NOT_PRESSED) ? "N" : "F"));
+                    "Ext Sol " + (loader.isExtending() ? "N" : "F")
+                 + " Ret Sol " + (loader.isRetracting() ? "N" : "F"));
                     // "N" = "oN",  "F" = "oFf".
                 dslcd.println(DriverStationLCD.Line.kUser5, 1,
-                     "Roller Motor " + format(ballRollerMotor.get(), 3,1));
+                     "Roller Motor " + format(loader.getRollorSpeed(), 3,1));
                 dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
                 diagOff = false;
                 break;

@@ -55,8 +55,6 @@ public interface IOParams {
     static final int DIAGNOSTIC_SELECTOR_AI_CHANNEL      = 7;  // Analog IO channels for diagnostics selector.
     static final int BATTERY_VOLTAGE_AI_CHANNEL          = 8;  // Channel allocated by FIRST for battery voltage.
     
-    static final double ENCODER_WHEELS_DISTANCE_PER_PULSE = 0.0075d; // Distance in inches per click
-    
     // Drive motor & encoders.
     static final double JOYSTICK_DEADBAND = 0.08;           // Joystick deadband for the motors.
    
