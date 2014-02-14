@@ -267,12 +267,6 @@ public class DanMain extends IterativeRobot implements IOParams {
 
     boolean diagOff = false;                        // Flag to display diagnostics-off screen once.
 
-    final String TODO_CRLF = "\n\r\000";                // String Constants.
-    final String TODO_SPACES = "          ";
-    final String TODO_SPACES_21 = "                     "; // For diagnostic console.
-    final String TODO_ZEROS = "0000000000";
-    final String TODO_TRUE  = "True ";
-    final String TODO_FALSE = "False";
 
     boolean cameraLightsButtonPressed;              // ?
     boolean cameraLightsButtonWasPressed;           // Status of camera lightbutton from previous message.
@@ -346,15 +340,15 @@ public class DanMain extends IterativeRobot implements IOParams {
         ds = DriverStation.getInstance();
         dslcd = DriverStationLCD.getInstance();
 
-        dslcd.println(DriverStationLCD.Line.kUser1, 1, TODO_SPACES_21);
-        dslcd.println(DriverStationLCD.Line.kUser2, 1, TODO_SPACES_21);
-        dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
-        dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
-        dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
-        dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
+        dslcd.println(DriverStationLCD.Line.kUser1, 1, StringUtils.TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser2, 1, StringUtils.TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser3, 1, StringUtils.TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser4, 1, StringUtils.TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
+        dslcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);        
         dslcd.updateLCD();
         
-        shootDiag6 = TODO_SPACES_21;
+        shootDiag6 = StringUtils.TODO_SPACES_21;
         shootTime = new Timer();                    // Used for shooting diagnostics.
         shootTime.reset();
         shootTimer = new Timer();                   // Used for various things while shooting.
@@ -427,7 +421,7 @@ public class DanMain extends IterativeRobot implements IOParams {
         autonomousMode = ((autonomousBit2.get() == LIMIT_SWITCH_PRESSED) ? 4 : 0) |
                          ((autonomousBit1.get() == LIMIT_SWITCH_PRESSED) ? 2 : 0) |
                          ((autonomousBit0.get() == LIMIT_SWITCH_PRESSED) ? 1 : 0);
-        System.out.println("Autonomous mode: " + format(autonomousMode, 2));
+        System.out.println("Autonomous mode: " + StringUtils.format(autonomousMode, 2));
         // Switches behave just like a limit switch on a Digital IO.
 
         diagnosticSelector = new AnalogChannel(DIAGNOSTIC_SELECTOR_AI_CHANNEL);
@@ -469,7 +463,7 @@ public class DanMain extends IterativeRobot implements IOParams {
         moveTimer = new Timer ();
         moveTimer.reset ();
 
-        autoDiag5 = TODO_SPACES_21;
+        autoDiag5 = StringUtils.TODO_SPACES_21;
     } // public void robotInit()
 
 
@@ -560,7 +554,7 @@ public class DanMain extends IterativeRobot implements IOParams {
                 break;
 
             default:
-                System.out.println("Unknown autonomous mode:" + format(autonomousMode, 3));
+                System.out.println("Unknown autonomous mode:" + StringUtils.format(autonomousMode, 3));
                 autonomousMode = 0;                 // Pretend there is no autonomous mode.
 
         } // switch (autonomousMode)
@@ -892,8 +886,8 @@ public class DanMain extends IterativeRobot implements IOParams {
                 break;
 
             default:
-                System.out.print ("Shoot unknown state " + format(shootState, 2) + 
-                    " from past state " + format(shootPastState, 2) +TODO_CRLF);
+                System.out.print ("Shoot unknown state " + StringUtils.format(shootState, 2) + 
+                    " from past state " + StringUtils.format(shootPastState, 2) + StringUtils.TODO_CRLF);
                 shootNextState = 0;
 // TODO - consider calling shootStop.
                 break;            
@@ -1166,93 +1160,7 @@ public class DanMain extends IterativeRobot implements IOParams {
         // Your autonomous code here.
    
     } // autonomous()    
-    
-    
-    // Formatted String manipulation functions
-    // Limitations for all routines is 10.10 (limited by the constants "spaces" and "zeros")
-    private String format(int i, int w) {
-        String s;
 
-        s = String.valueOf(i);
-        s = TODO_SPACES + s.trim();
-        return s.substring(s.length() - w + 1);
-    } // private String format(int
-
-    private String format(long l, int w) {
-        String s;
-
-        s = String.valueOf(l);
-        s = TODO_SPACES + s.trim();
-        return s.substring(s.length() - w + 1);
-    } // private String format(long
-
-    private String format(float f, int w, int d) {
-        long l;
-        String s, t;
-        double ff;
-
-        ff = Math.abs(f);
-        l = (long) ff;                          // Truncate to integer.
-        s = String.valueOf(l);
-        s = s.trim();
-        if (f < 0) {
-            s = "-" + s;
-        }
-        s = TODO_SPACES + s;
-        s = s.substring(s.length() - w);
-
-        l = (long) ((ff - (double) l) * pow10(d));  // Make the fraction an integer.
-        t = String.valueOf(l);
-        while (t.length() < d) {
-            t = "0" + t;
-        }
-        t = t.trim() + TODO_ZEROS;
-        t = t.substring(0, d);
-
-        return s + "." + t;
-    } // private String format(float
-
-    private String format(double f, int w, int d) {
-        long l;
-        String s, t;
-        double ff;
-
-        ff = Math.abs(f);
-        l = (long) ff;                              // Truncate to integer.
-        s = String.valueOf(l);
-        s = s.trim();
-        if (f < 0) {
-            s = "-" + s;
-        }
-        s = TODO_SPACES + s;
-        s = s.substring(s.length() - w);
-
-        l = (long) ((ff - (double) l) * pow10(d));  // Make the fraction an integer.
-        t = String.valueOf(l);
-        while (t.length() < d) {
-            t = "0" + t;
-        }
-        t = t.trim() + TODO_ZEROS;
-        t = t.substring(0, d);
-
-        return s + "." + t;
-    } // private String format(double
-
-    private String format(boolean b) {
-        if (b) {
-            return TODO_TRUE;
-        } else {
-            return TODO_FALSE;
-        }
-    } // private String format(int
-
-    private double pow10(int d) {
-        double r = 1;
-        for (int i = 0; i < d; ++i) {
-            r = r * 10.0;
-        }
-        return r;
-    }
 
 
     // Stop the robot NOW!
@@ -1290,27 +1198,27 @@ public class DanMain extends IterativeRobot implements IOParams {
             case 0:
                 if (diagOff == false) {             // Do this once per entry into diagnostice Off.
                     diagOff = true;                              // 123456789012345678901
-                    dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2)
-				  + " " + format (diagnosticSelector.getValue(),5));
+                    dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
+				  + " " + StringUtils.format (diagnosticSelector.getValue(),5));
                     dslcd.println(DriverStationLCD.Line.kUser2, 1, "Diagnostics Off       ");
-                    dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
-                    dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
-                    dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
-                    dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser3, 1, StringUtils.TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser4, 1, StringUtils.TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
+                    dslcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);
                 } // if (diagOff != false;
                 break;
 
             // Driver joystick left.
             case 1:
                                                              // 123456789012345678901
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
-                    + " " + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Driver Joystick Left  ");
 
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
-                    "X"  + format(driveStickL.getX(), 2, 2) +
-                    " Y" + format(driveStickL.getY(), 2, 2) +
-                    " Z" + format(driveStickL.getZ(), 2, 2));
+                    "X"  + StringUtils.format(driveStickL.getX(), 2, 2) +
+                    " Y" + StringUtils.format(driveStickL.getY(), 2, 2) +
+                    " Z" + StringUtils.format(driveStickL.getZ(), 2, 2));
 
                 b1 = ((driveStickL.getRawButton(1)) ? sP : sS);
                 b2 = ((driveStickL.getRawButton(2)) ? sP : sS);
@@ -1337,14 +1245,14 @@ public class DanMain extends IterativeRobot implements IOParams {
             // Driver joystick right.
             case 2:
                                                              // 123456789012345678901
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
-                    + " " + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Driver Joystick Right ");
 
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
-                    "X"  + format(driveStickR.getX(), 2, 2) +
-                    " Y" + format(driveStickR.getY(), 2, 2) +
-                    " Z" + format(driveStickR.getZ(), 2, 2));
+                    "X"  + StringUtils.format(driveStickR.getX(), 2, 2) +
+                    " Y" + StringUtils.format(driveStickR.getY(), 2, 2) +
+                    " Z" + StringUtils.format(driveStickR.getZ(), 2, 2));
 
                 b1 = ((driveStickR.getRawButton(1)) ? sP : sS);
                 b2 = ((driveStickR.getRawButton(2)) ? sP : sS);
@@ -1371,14 +1279,14 @@ public class DanMain extends IterativeRobot implements IOParams {
             // Shooter joystick
             case 3:
                                                              // 123456789012345678901
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
-                    + " " + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter Joystick      ");
 
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
-                    "X"  + format(armStick.getX(), 2, 2) +
-                    " Y" + format(armStick.getY(), 2, 2) +
-                    " Z" + format(armStick.getZ(), 2, 2));
+                    "X"  + StringUtils.format(armStick.getX(), 2, 2) +
+                    " Y" + StringUtils.format(armStick.getY(), 2, 2) +
+                    " Z" + StringUtils.format(armStick.getZ(), 2, 2));
 
                 b1 = ((armStick.getRawButton(1)) ? sP : sS);
                 b2 = ((armStick.getRawButton(2)) ? sP : sS);
@@ -1405,69 +1313,69 @@ public class DanMain extends IterativeRobot implements IOParams {
             // Shooter Diagnostics.
             case 4:
                                                              // 123456789012345678901
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
-                    + " " + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 tm = shootTime.get ()/10.0d;                 // Make id 1/1000 to 1/100 of sec.
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter        " + format(tm, 3, 2));
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter        " + StringUtils.format(tm, 3, 2));
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
                     "Ball Loaded " + ((isBallInShooter ()) ? "Y " : "N ") 
-                    + format (ballLoadedSensor.getValue(), 6));
+                    + StringUtils.format (ballLoadedSensor.getValue(), 6));
                 s = "Ckd " + ((shooterCockedLimitSwitch.get () == ARM_COCKED) ? "Y " : "N ") +
-                    "Mn/Mx " + format(ARM_POSITION_MIN, 4) + "/" + format(ARM_POSITION_MAX, 4);
+                    "Mn/Mx " + StringUtils.format(ARM_POSITION_MIN, 4) + "/" + StringUtils.format(ARM_POSITION_MAX, 4);
                 dslcd.println(DriverStationLCD.Line.kUser4, 1, s);
                 dslcd.println(DriverStationLCD.Line.kUser5, 1,
-                   "Arm Position " + format(armPosition.getValue(), 3) + "     ");
+                   "Arm Position " + StringUtils.format(armPosition.getValue(), 3) + "     ");
                 dslcd.println(DriverStationLCD.Line.kUser6, 1, shootDiag6); // Use text from shoot function.
                 diagOff = false;
                 break;
 
             // Shooter Diagnostics 2.
             case 5:
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2)
-                    + " " + format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter 2      " + format(tm, 3, 2));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter 2      " + StringUtils.format(tm, 3, 2));
                 dslcd.println(DriverStationLCD.Line.kUser3, 1,
                     "Arm Ext LS " + ((armExtendLimitSwitch.get()==LIMIT_SWITCH_PRESSED) ? "P" : "_") + "         ");
                 dslcd.println(DriverStationLCD.Line.kUser4, 1,
                     "Arm Ret LS " + ((armRetractLimitSwitch.get()==LIMIT_SWITCH_PRESSED) ? "P" : "_") + "         ");
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);        
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);        
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);
                 diagOff = false;
                 break;
 
             // Drive motor power
             case 6:
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2)
-                    + " " + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Drive motor power    ");
-                dslcd.println(DriverStationLCD.Line.kUser3, 1, "Left motor:   " + format ( leftWheelPower, 4, 3));
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Shoot: " + format (shooterMotorEncoder.getDistance(),6, 2));;
+                dslcd.println(DriverStationLCD.Line.kUser3, 1, "Left motor:   " + StringUtils.format ( leftWheelPower, 4, 3));
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Shoot: " + StringUtils.format (shooterMotorEncoder.getDistance(),6, 2));;
 //                dslcd.println(DriverStationLCD.Line.kUser4, 1, "Right motor:  " + format (rightWheelPower, 4, 3));
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, "Left:  " + format(tankDrive.getLeftEncoderDistance(),6, 2));
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, "Right: " + format(tankDrive.getRightEncoderDistance(),6, 2));
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, "Left:  " + StringUtils.format(tankDrive.getLeftEncoderDistance(),6, 2));
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, "Right: " + StringUtils.format(tankDrive.getRightEncoderDistance(),6, 2));
                 diagOff = false;
                 break;
 
             // Miscellaneus...
             case 7:
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2)
-                    + " " + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Miscellaneus...      ");
                 //dslcd.println(DriverStationLCD.Line.kUser3, 1, kSpaces21);
 //                s = "Gyro " + String.format("%f3.2", gyro.getAngle());
-                s = "Gyro " + format(gyro.getAngle(),3,2);
+                s = "Gyro " + StringUtils.format(gyro.getAngle(),3,2);
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, s);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);        
                 diagOff = false;
                 break;
 
             // Ball pickup arm
             case 8:
                                                              // 123456789012345678901
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) + " " 
-                    + format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) + " " 
+                    + StringUtils.format (diagnosticSelector.getValue (),5));
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "Ball pickup arm      ");
                 s =      "Ext LS "  + ((armExtendLimitSwitch.get () == LIMIT_SWITCH_NOT_PRESSED) ? "P" : "_");
                 s = s + " Ret LS " + ((armRetractLimitSwitch.get() == LIMIT_SWITCH_NOT_PRESSED) ? "P" : "_");
@@ -1477,18 +1385,18 @@ public class DanMain extends IterativeRobot implements IOParams {
                  + " Ret Sol " + (loader.isRetracting() ? "N" : "F"));
                     // "N" = "oN",  "F" = "oFf".
                 dslcd.println(DriverStationLCD.Line.kUser5, 1,
-                     "Roller Motor " + format(loader.getRollorSpeed(), 3,1));
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
+                     "Roller Motor " + StringUtils.format(loader.getRollorSpeed(), 3,1));
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);        
                 diagOff = false;
                 break;
 
             // TBD
             case 9:
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
-                    + " " + format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser3, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, StringUtils.TODO_SPACES_21);
                 dslcd.println(DriverStationLCD.Line.kUser5, 1, autoDiag5);
                 dslcd.println(DriverStationLCD.Line.kUser6, 1, shootDiag6); // Use text from shoot function.
                 diagOff = false;
@@ -1509,13 +1417,13 @@ public class DanMain extends IterativeRobot implements IOParams {
                 break;
 */                
             default:
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "Diag:" + format (d, 3) + " Bad Selection");
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, "T66 - Flyers  " + format (d, 2)
-                    + " " + format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser3, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, TODO_SPACES_21);
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, TODO_SPACES_21);        
+                dslcd.println(DriverStationLCD.Line.kUser1, 1, "Diag:" + StringUtils.format (d, 3) + " Bad Selection");
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
+                    + " " + StringUtils.format (diagnosticSelector.getValue (),5));
+                dslcd.println(DriverStationLCD.Line.kUser3, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser4, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
+                dslcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);        
                 diagOff = false;
                 break;
             }  //switch ()
