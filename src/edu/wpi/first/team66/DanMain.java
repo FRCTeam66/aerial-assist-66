@@ -1402,20 +1402,6 @@ public class DanMain extends IterativeRobot implements IOParams {
                 diagOff = false;
                 break;
                 
-
-                
-/*            // TBD
-            case 9:
-                dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + format (d, 2) 
-                    + " " + format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser3, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser4, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser5, 1, kSpaces21);
-                dslcd.println(DriverStationLCD.Line.kUser6, 1, kSpaces21);        
-                diagOff = false;
-                break;
-*/                
             default:
                 dslcd.println(DriverStationLCD.Line.kUser1, 1, "Diag:" + StringUtils.format (d, 3) + " Bad Selection");
                 dslcd.println(DriverStationLCD.Line.kUser2, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
