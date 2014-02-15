@@ -364,7 +364,14 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         }
         
         if (inputs.getShootButton()) {
-            shooter.shoot();
+            // TODO
+            shooter.shoot(0, 0);
+        }
+        else if(inputs.getTrussTossButton()){
+            shooter.trussToss();
+        }
+        else{
+            shooter.stop();
         }
 
         double deltaTime = periodicTimer.getDeltaTime();

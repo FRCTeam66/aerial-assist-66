@@ -57,7 +57,16 @@ public class Shooter implements IOParams {
         return ballLoadedSensor.getAverageValue() > 110;
     }
     
-    public boolean shoot()
+    public boolean shoot(double speed, double releaseAngle)
+    {
+        if (currentState == STATE_COCKED_AND_IDLE)
+        {
+            // think about being able to shoot
+        }
+        return false;
+    }
+    
+    public boolean trussToss()
     {
         if (currentState == STATE_COCKED_AND_IDLE)
         {
