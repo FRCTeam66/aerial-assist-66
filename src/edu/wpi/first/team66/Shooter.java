@@ -81,7 +81,7 @@ public class Shooter implements IOParams {
         return false;
     }
     
-    public void update(double deltaTime)
+    public void update(double deltaTime, boolean checkLoaderExtended)
     {
         shooterMotor.set(0);
 //        

@@ -314,7 +314,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         autoStateMachine.update(tankDrive, loader, shooter);
         
         double deltaTime = periodicTimer.getDeltaTime();
-        shooter.update(deltaTime);
+        shooter.update(deltaTime, false /* Do not override loader limit switch state */);
         tankDrive.update(deltaTime);
 
     }
@@ -375,7 +375,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         }
 
         double deltaTime = periodicTimer.getDeltaTime();
-        shooter.update(deltaTime);
+        shooter.update(deltaTime, inputs.getOverrideLoaderExtendedCheckButton());
         tankDrive.update(deltaTime);
     }
 
