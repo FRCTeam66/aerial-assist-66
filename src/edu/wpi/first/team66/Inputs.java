@@ -41,13 +41,13 @@ public class Inputs implements IOParams {
     public double getRightDriveSpeed()
     {
         double v = driveStickR.getY();
-        return v > JOYSTICK_DEADBAND ? v : 0.0;
+        return Math.abs(v) > JOYSTICK_DEADBAND ? v : 0.0;
     }
     
     public double getLeftDriveSpeed()
     {
         double v = driveStickL.getY();
-        return v > JOYSTICK_DEADBAND ? v : 0.0;
+        return Math.abs(v) > JOYSTICK_DEADBAND ? v : 0.0;
     }
     
     public int getShiftMode()
