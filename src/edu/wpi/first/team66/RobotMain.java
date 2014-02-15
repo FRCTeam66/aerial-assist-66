@@ -175,7 +175,7 @@ import edu.wpi.first.team66.params.StateParams;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class DanMain extends IterativeRobot implements IOParams, StateParams {
+public class RobotMain extends IterativeRobot implements IOParams, StateParams {
 
     private DeltaTimer periodicTimer = null;
     
