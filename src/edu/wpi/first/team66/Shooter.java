@@ -9,12 +9,13 @@ import edu.wpi.first.wpilibj.SpeedController;
 public class Shooter implements IOParams {
 
     private static final int STATE_INIT = -1;
-    private static final int STATE_COCKED_AND_IDLE = 0;
+    private static final int STATE_IDLE = 0;
     private static final int STATE_PREFIRE_CHECKS = 1;
     private static final int STATE_CHAMBER_BALL = 2;
     private static final int STATE_SHOOTING = 3;
     private static final int STATE_STOPPING = 4;
     private static final int STATE_RESETTING = 5;
+    private static final int STATE_UNKNOWN = 6;
     
     private static final double VOLT_TO_ANGLE_SLOPE = -148.76d;
     private static final double VOLT_TO_ANGLE_INTERCEPT = 747.52d;
@@ -59,7 +60,7 @@ public class Shooter implements IOParams {
     
     public boolean shoot(double speed, double releaseAngle)
     {
-        if (currentState == STATE_COCKED_AND_IDLE)
+        if (currentState == STATE_IDLE)
         {
             // think about being able to shoot
         }
@@ -68,7 +69,7 @@ public class Shooter implements IOParams {
     
     public boolean trussToss()
     {
-        if (currentState == STATE_COCKED_AND_IDLE)
+        if (currentState == STATE_IDLE)
         {
             // think about being able to shoot
         }
@@ -79,6 +80,24 @@ public class Shooter implements IOParams {
     {
         // TODO try to stop if we aren't committed
         return false;
+    }
+    
+    public void manualControl(double speed, boolean checkLoaderExtended)
+    {
+        // The autmotaic shooting state machine
+        // no longer knows the shooter's state.
+        currentState = STATE_UNKNOWN;
+        
+        if(loader.isExtended() || !checkLoaderExtended)
+        {
+            // TODO: Check shooter arm limit switches to prevent moving
+            // in a bad direction.
+            shooterMotor.set(speed * 0.3);
+        }
+        else
+        {
+            shooterMotor.set(0);
+        }
     }
     
     public void update(double deltaTime, boolean checkLoaderExtended)
@@ -167,7 +186,7 @@ public class Shooter implements IOParams {
     
     public boolean isCocked()
     {
-        return currentState == STATE_COCKED_AND_IDLE && isInCockedPosition();
+        return currentState == STATE_IDLE && isInCockedPosition();
     }
     
     private boolean isBallChambered()

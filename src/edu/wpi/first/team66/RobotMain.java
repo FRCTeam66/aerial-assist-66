@@ -373,9 +373,18 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         else{
             shooter.stop();
         }
-
+        
         double deltaTime = periodicTimer.getDeltaTime();
-        shooter.update(deltaTime, inputs.getOverrideLoaderExtendedCheckButton());
+        boolean checkExtended = !inputs.getOverrideLoaderExtendedCheckButton();
+        if(inputs.getManualShooterControlButton())
+        {
+            double speed = inputs.getManualShooterControlSpeed();
+            shooter.manualControl(speed, checkExtended);
+        }
+        else
+        {
+            shooter.update(deltaTime, checkExtended);
+        }
         tankDrive.update(deltaTime);
     }
 

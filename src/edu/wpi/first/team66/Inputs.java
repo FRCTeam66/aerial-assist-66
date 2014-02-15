@@ -74,6 +74,17 @@ public class Inputs implements IOParams, ControllerParams {
                shooterController.getRawButton(TRUSS_TOSS_BUTTON_2_ID);
     }
     
+    public boolean getManualShooterControlButton()
+    {
+        return shooterController.getRawButton(MANUAL_SHOOTER_MOVE_BUTTON_ID);
+    }
+    
+    public double getManualShooterControlSpeed()
+    {
+        double v = shooterController.getAxis(MANUAL_SHOOTER_MOVE_AXIS_ID);
+        return (Math.abs(v) > JOYSTICK_DEADBAND) ? v : 0;
+    }
+    
     public boolean getOverrideLoaderExtendedCheckButton()
     {
         return shooterController.getRawButton(OVERRIDE_LOADER_EXTENDED_CHECK_BUTTON_ID);
