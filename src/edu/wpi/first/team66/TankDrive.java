@@ -16,12 +16,11 @@ import edu.wpi.first.wpilibj.SpeedController;
 public class TankDrive implements IOParams, RobotParams {
     
     // TODO parameterize or at least put in a more convenient location
-    // TODO reverse right motor?
     /**
      * Current value allows a motor to do a complete reversal (-1 -> 1)
      * in 400 milliseconds
      */
-    private static final double MAX_ACCELERATION = 5; // [units]/s
+    private static final double MAX_ACCELERATION = 5; // [% max speed] / s
     
     private static final double DISTANCE_ERROR_THRESHOLD = 12; // inches
     
@@ -69,7 +68,7 @@ public class TankDrive implements IOParams, RobotParams {
         rightMotorEncoder.setDistancePerPulse(DRIVE_ENCODER_INCHES_PER_PULSE);
         rightMotorEncoder.setReverseDirection(IS_RIGHT_DRIVE_REVERSED);
         
-        shiftLowGear();
+        TankDrive.this.shiftLowGear();
     }
     
     public void shiftLowGear()
