@@ -158,13 +158,11 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStationLCD;
 
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Joystick;
 
-import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.team66.params.IOParams;
 import edu.wpi.first.team66.params.StateParams;
@@ -180,6 +178,8 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
 
     private DiagnosticDisplay diagnostics = null;
     
+    private Inputs inputs = null;
+    
     private DeltaTimer periodicTimer = null;
     
     private TankDrive tankDrive = null;
@@ -190,46 +190,10 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
     
     private StateMachine autoStateMachine = null;
     
-    
-    Hand hand;                                      // Required for the trigger function
-    
-    // Declare variables for the two joysticks being used
-    Joystick driveStickL;                           // Joystick Left  (tank drive)
-    Joystick driveStickR;                           // Joystick Right (tank drive)
-    Joystick armStick;                              // Joystick for the arm
-
     // Gyro objects and constants. The Gyro object takes care of everything for us.
     Gyro gyro;                                      // Gyro for autonomous steering.
-
-    // Time of autonomous or telop modes
-    Timer timer = new Timer();
-
-    private int autonomousMode = 0;     // Mode is a number between 0 and 7.
-    double autonomousStopTime = 0.0;    // Used as safety time in autonomous.
-
-    DigitalInput autonomousBit0;
-    DigitalInput autonomousBit1;
-    DigitalInput autonomousBit2;
-
-    AnalogChannel armPosition;
-
-    final double DRIVE_STOP = 0.0;                  // Motor stop
-
-    boolean diagOff = false;                        // Flag to display diagnostics-off screen once.
-
-    boolean cameraLightsButtonPressed;              // ?
-    boolean cameraLightsButtonWasPressed;           // Status of camera lightbutton from previous message.
-
-    Compressor airCompressor;                       // Define the air compressor object.
     
-    final boolean lowShifterHigh    = false; // To shift high gear
-    final boolean higherShifterhigh = true;
-
-    final boolean lowShifterLow     = true; // To shift to low gear.
-    final boolean highShifterLow    = false;
-
-    double leftWheelPower = 0.0d;                   // Used in diagnostics.
-    double rightWheelPower = 0.0d;                  // Used in diagnostics.
+    Compressor airCompressor;                       // Define the air compressor object.
     
     /**
      * This function is run when the robot is first started up and should be
@@ -238,11 +202,18 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
     public void robotInit() {
         periodicTimer = new DeltaTimer();
         
-        // Define joysticks being used at USB port #1 and USB port #2 on the Drivers Station
-        driveStickL = new Joystick(1);
-        driveStickR = new Joystick(2);
-        armStick    = new Joystick(3);
-
+        Joystick driveStickL = new Joystick(1);
+        Joystick driveStickR = new Joystick(2);
+        Joystick armStick    = new Joystick(3);
+        
+        inputs = new Inputs(
+                driveStickL,
+                driveStickR,
+                armStick,
+                new DigitalInput(AUTONOMOUS_BIT_0_DI_CHANNEL),
+                new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL),
+                new DigitalInput(AUTONOMOUS_BIT_2_DI_CHANNEL));
+        
         // Setup tank drive
         Encoder leftMotorEncoder = new Encoder(
                 DIO_SLOT,
@@ -296,31 +267,14 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
                 shooterShotLimitSwitch,
                 loader);
 
-        gyro = new Gyro(GYRO_ANALOG_AI_CHANNEL);       // Gyro object
+        // Misc.
+        gyro = new Gyro(GYRO_ANALOG_AI_CHANNEL);
         gyro.reset();
-        
-        // Autonomous stuff...
-        autonomousBit0 = new DigitalInput(AUTONOMOUS_BIT_0_DI_CHANNEL);
-        autonomousBit1 = new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL);
-        autonomousBit2 = new DigitalInput(AUTONOMOUS_BIT_2_DI_CHANNEL);
 
-        autonomousMode = ((autonomousBit2.get()) ? 4 : 0) |
-                         ((autonomousBit1.get()) ? 2 : 0) |
-                         ((autonomousBit0.get()) ? 1 : 0);
-        System.out.println("Autonomous mode: " + StringUtils.format(autonomousMode, 2));
-        
         autoStateMachine = new StateMachine();
         
-        // Switches behave just like a limit switch on a Digital IO.
-
         airCompressor = new Compressor(NASSON_PRESSURE_SWITCH_DI_CHANNEL, AIR_COMPRESSOR_RELAY_RIO_CHANNEL);
-        airCompressor.start();                      // Start the air compressor.
-
-        cameraLightsButtonPressed = JOYSTICK_BUTTON_NOT_PRESSED;
-        cameraLightsButtonWasPressed = false;
-
-        timer = new Timer ();                       // Instantiate the match timer shootDiag6
-        timer.reset();
+        airCompressor.start();
 
         diagnostics = new DiagnosticDisplay(
                 DriverStation.getInstance(),
@@ -336,10 +290,9 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
 
     public void autonomousInit () {
         periodicTimer.reset();
-        timer.start();
         airCompressor.start();
         
-        switch (autonomousMode) {
+        switch (inputs.getAutonomousMode()) {
             case AMODE_DO_NOTHING:
                 autoStateMachine.setState(new DoNothingState());
                 break;
@@ -375,60 +328,36 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        double yl, yr;
-        int i;
-        boolean b;
-
-        // Call the diagnostic display functions.
-        // This function will decide what to do.
         diagnostics.displayDiagnostics();
-
-        // +T66
-        // Driver joysticks.
-        // If either trigger is pulled then shift to low speed.
-        i = (driveStickL.getRawButton(DRIVER_SHIFTER_TRIGGER) ? 2 : 0) +
-            (driveStickR.getRawButton(DRIVER_SHIFTER_TRIGGER) ? 1 : 0);
-        if (i == 0) {                               // Neither trigger button is pressed,
+        
+        if (inputs.getShiftMode() == SHIFT_MODE_HIGH) {
             tankDrive.shiftHighGear();
-        } else {                                    // A trigger button is pressed,
+        } else {
             tankDrive.shiftLowGear();
         }
-
-        // Set the motors speed.
-        yl = driveStickL.getY();
-        yl = (Math.abs(yl) < JOYSTICK_DEADBAND) ? 0.0 :yl; // If within in deadband make it 0.
-
-        yr = driveStickR.getY();
-        yr = (Math.abs(yr) < JOYSTICK_DEADBAND) ? 0.0 :yr;
         
-        tankDrive.setTargetSpeed(yl, yr);
+        tankDrive.setTargetSpeed(
+                inputs.getLeftDriveSpeed(),
+                inputs.getRightDriveSpeed());
 
-        // If the Joystick Arm Extend button is pressed, then extend the arm...
-        // just the arm extend Solenoid, and set the ball roller motor to Load.
-        if (armStick.getRawButton(JOYSTICK_ARM_EXTEND_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
+        if (inputs.getExtendButton())
+        {
             loader.extend();
-        } // if (armStick.getRawButton(kJoystickArmExtendButton) == kJoystickButtonPressed)
-
-        // If the Joystick Arm Retract button is pressed, then retract the arm...
-        //   just turn on the motor to retract, and turn off the ball roller motor
-        //   (otherwise it might eject the ball).
-        // This is using an "else if" to handle the situation if both buttons
-        //   are pressed at once.
-        else if (armStick.getRawButton (JOYSTIC_ARM_RETRACT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
+        }
+        else if (inputs.getRetractButton())
+        {
             loader.retract();
-        } // else if (armStick.getRaw (kJoyStickArmRetractButton) == kJoystickButtonPressed)
-
-        // If the Joystick ball eject button is pressed
-        //   then turn on the motor to eject the ball and retract the arm.
-        if (armStick.getRawButton (JOYSTICK_ARM_EJECT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
+        }
+        else if (inputs.getEjectButton())
+        {
             loader.eject();
         }
-        else if (loader.isEjecting()) {
+        else if (loader.isEjecting())
+        {
             loader.stopEjecting();
         }
-
-        // Is the shooting trigger button pressed?
-        if (armStick.getRawButton (JOYSTICK_ARM_SHOOT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
+        
+        if (inputs.getShootButton()) {
             shooter.shoot();
         }
 

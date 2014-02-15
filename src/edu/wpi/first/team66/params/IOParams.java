@@ -121,4 +121,8 @@ public interface IOParams {
     static final double PAUSE_AFTER_SHOOTING_TIME = 500.0d;   // Pause 500 milli-seconds (0.5 sec.) after shooting 
                                                     // to let the shooter stop moving.
     static final double ENCODER_SHOOTER_DISTANCE_PER_PULSE = 1.0d;
+    
+    static final int SHIFT_MODE_LOW = 0;
+    static final int SHIFT_MODE_HIGH = 1;
+    static final int SHIFT_MODE_AUTO = 2;
 }
