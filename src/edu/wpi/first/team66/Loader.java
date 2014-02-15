@@ -75,8 +75,8 @@ public class Loader implements IOParams {
     
     public void eject() {
         ballRollerMotor.set(BALL_ROLLER_MOTOR_EJECT_ON);
-        armExtendSolenoid.set(armExtendSolenoidRetract);
-        armRetractSolenoid.set(armRetractSolenoidRetract);
+        armExtendSolenoid.set(ARM_EXTEND_SOLENOID_RETRACT);
+        armRetractSolenoid.set(ARM_RETRACT_SOLENOID_RETRACT);
         ejecting = true;
     }
     

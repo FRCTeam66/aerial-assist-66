@@ -144,6 +144,7 @@ package edu.wpi.first.team66;
 import edu.wpi.first.team66.autonomous.DoNothingState;
 import edu.wpi.first.team66.autonomous.StateMachine;
 import edu.wpi.first.team66.autonomous.mode1.Mode1InitState;
+import edu.wpi.first.team66.params.ControllerParams;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 
@@ -174,7 +175,7 @@ import edu.wpi.first.team66.params.StateParams;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotMain extends IterativeRobot implements IOParams, StateParams {
+public class RobotMain extends IterativeRobot implements IOParams, StateParams, ControllerParams {
 
     private DiagnosticDisplay diagnostics = null;
     
@@ -201,14 +202,12 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
     public void robotInit() {
         periodicTimer = new DeltaTimer();
         
-        Joystick driveStickL = new Joystick(1);
-        Joystick driveStickR = new Joystick(2);
-        Joystick armStick    = new Joystick(3);
+        Joystick driverController = new Joystick(DRIVER_CONTROLLER_ID);
+        Joystick shooterController = new Joystick(SHOOTER_CONTROLLER_ID);
         
         inputs = new Inputs(
-                driveStickL,
-                driveStickR,
-                armStick,
+                driverController,
+                shooterController,
                 new DigitalInput(AUTONOMOUS_BIT_0_DI_CHANNEL),
                 new DigitalInput(AUTONOMOUS_BIT_1_DI_CHANNEL),
                 new DigitalInput(AUTONOMOUS_BIT_2_DI_CHANNEL));
@@ -282,9 +281,9 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
                 DriverStation.getInstance(),
                 DriverStationLCD.getInstance(),
                 new AnalogChannel(DIAGNOSTIC_SELECTOR_AI_CHANNEL),
-                driveStickL,
-                driveStickR,
-                armStick,
+                driverController,
+                shooterController,
+                null,
                 tankDrive,
                 shooter,
                 loader);
@@ -350,12 +349,15 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
         {
             loader.retract();
         }
-        else if (inputs.getEjectButton())
+        
+        if (inputs.getRollOutButton())
         {
+            //TODO
             loader.eject();
         }
-        else if (loader.isEjecting())
+        else if (inputs.getRollInButton())
         {
+            //TODO
             loader.stopEjecting();
         }
         

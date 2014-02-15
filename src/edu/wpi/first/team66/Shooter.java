@@ -173,7 +173,7 @@ public class Shooter implements IOParams {
     
     public boolean isInCockedPosition()
     {
-        return shooterCockedLimitSwitch.get() == LIMIT_SWITCH_PRESSED ? true:false;
+        return shooterCockedLimitSwitch.get();
     }
     
     /**

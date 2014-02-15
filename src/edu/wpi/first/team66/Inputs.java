@@ -1,30 +1,28 @@
 package edu.wpi.first.team66;
 
+import edu.wpi.first.team66.params.ControllerParams;
 import edu.wpi.first.team66.params.IOParams;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 
-public class Inputs implements IOParams {
+public class Inputs implements IOParams, ControllerParams {
     
-    private final Joystick driveStickL;
-    private final Joystick driveStickR;
-    private final Joystick armStick;
+    private final Joystick driverController;
+    private final Joystick shooterController;
     
     private final DigitalInput autoModeSelectorBit0;
     private final DigitalInput autoModeSelectorBit1;
     private final DigitalInput autoModeSelectorBit2;
     
     public Inputs(
-            Joystick driveStickL,
-            Joystick driveStickR,
-            Joystick armStick,
+            Joystick driverController,
+            Joystick shooterController,
             DigitalInput autoModeSelectorBit0,
             DigitalInput autoModeSelectorBit1,
             DigitalInput autoModeSelectorBit2)
     {
-        this.driveStickL = driveStickL;
-        this.driveStickR = driveStickR;
-        this.armStick = armStick;
+        this.driverController = driverController;
+        this.shooterController = shooterController;
         
         this.autoModeSelectorBit0 = autoModeSelectorBit0;
         this.autoModeSelectorBit1 = autoModeSelectorBit1;
@@ -40,49 +38,53 @@ public class Inputs implements IOParams {
     
     public double getRightDriveSpeed()
     {
-        double v = driveStickR.getY();
+        double v = driverController.getAxis(RIGHT_DRIVE_AXIS_ID);
         return Math.abs(v) > JOYSTICK_DEADBAND ? v : 0.0;
     }
     
     public double getLeftDriveSpeed()
     {
-        double v = driveStickL.getY();
+        double v = driverController.getAxis(LEFT_DRIVE_AXIS_ID);
         return Math.abs(v) > JOYSTICK_DEADBAND ? v : 0.0;
     }
     
     public int getShiftMode()
     {
-        if (driveStickL.getRawButton(DRIVER_SHIFTER_TRIGGER))
-        {
-            return SHIFT_MODE_LOW;
-        }
-        else if (driveStickR.getRawButton(DRIVER_SHIFTER_TRIGGER))
+        // if either of these two buttons are held
+        if (driverController.getRawButton(HIGH_GEAR_BUTTON_1_ID) || 
+            driverController.getRawButton(HIGH_GEAR_BUTTON_2_ID))
         {
             return SHIFT_MODE_HIGH;
         }
         else
         {
-            return SHIFT_MODE_AUTO;
+            return SHIFT_MODE_LOW;
         }
     }
     
     public boolean getShootButton()
     {
-        return armStick.getRawButton (JOYSTICK_ARM_SHOOT_BUTTON);
+        return shooterController.getRawButton(STANDARD_SHOT_BUTTON_1_ID) && 
+               shooterController.getRawButton(STANDARD_SHOT_BUTTON_2_ID);
     }
     
     public boolean getExtendButton()
     {
-        return armStick.getRawButton(JOYSTICK_ARM_EXTEND_BUTTON);
+        return shooterController.getRawButton(EXTEND_LOADER_BUTTON_ID);
     }
     
     public boolean getRetractButton()
     {
-        return armStick.getRawButton(JOYSTIC_ARM_RETRACT_BUTTON);
+        return shooterController.getRawButton(RETRACT_LOADER_BUTTON_ID);
     }
     
-    public boolean getEjectButton()
+    public boolean getRollOutButton()
     {
-        return armStick.getRawButton (JOYSTICK_ARM_EJECT_BUTTON);
+        return shooterController.getRawButton(ROLL_OUT_LOADER_BUTTON_ID);
+    }
+    
+    public boolean getRollInButton()
+    {
+        return shooterController.getRawButton(ROLL_IN_LOADER_BUTTON_ID);
     }
 }
