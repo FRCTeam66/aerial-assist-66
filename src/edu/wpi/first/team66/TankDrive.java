@@ -183,12 +183,12 @@ public class TankDrive implements IOParams, RobotParams {
                 targetRightSpeed));
     }
         
-    private double getCommandedLeftSpeed()
+    public double getCommandedLeftSpeed()
     {
         return (IS_LEFT_DRIVE_REVERSED ? -1 : 1) * leftMotor.get();
     }
     
-    private double getCommandedRightSpeed()
+    public double getCommandedRightSpeed()
     {
         return (IS_RIGHT_DRIVE_REVERSED ? -1 : 1) * rightMotor.get();
     }
