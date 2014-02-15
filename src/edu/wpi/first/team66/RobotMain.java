@@ -190,10 +190,9 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
     
     private StateMachine autoStateMachine = null;
     
-    // Gyro objects and constants. The Gyro object takes care of everything for us.
-    Gyro gyro;                                      // Gyro for autonomous steering.
+    private Gyro gyro;
     
-    Compressor airCompressor;                       // Define the air compressor object.
+    private Compressor airCompressor;
     
     /**
      * This function is run when the robot is first started up and should be
