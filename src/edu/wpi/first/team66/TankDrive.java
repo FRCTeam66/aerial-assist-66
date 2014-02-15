@@ -176,7 +176,7 @@ public class TankDrive implements IOParams, RobotParams {
                 currentLeftSpeed + maxDelta,
                 targetLeftSpeed));
         
-        setRightSpeed((IS_RIGHT_DRIVE_REVERSED ? -1 : 1) * Math2.clamp(
+        setRightSpeed(Math2.clamp(
                 currentRightSpeed - maxDelta,
                 currentRightSpeed + maxDelta,
                 targetRightSpeed));
