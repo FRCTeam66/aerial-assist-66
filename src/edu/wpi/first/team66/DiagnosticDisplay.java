@@ -222,8 +222,8 @@ public class DiagnosticDisplay implements IOParams {
                 lcd.println(DriverStationLCD.Line.kUser3, 1,
                     "Arm Ext LS " + (/* todo */ false ? "P" : "_") + "         ");
                 lcd.println(DriverStationLCD.Line.kUser4, 1,
-                    "Arm Ret LS " + ((/* todo */ false) ? "P" : "_") + "         ");
-                lcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);        
+                    "Shooter Ret LS " + StringUtils.format(shooter.isInCockedPosition()));
+                lcd.println(DriverStationLCD.Line.kUser5, 1, "Angle: " + StringUtils.format(shooter.getShooterAngle(),3,4));        
                 lcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);
                 diagOff = false;
                 break;
@@ -247,8 +247,8 @@ public class DiagnosticDisplay implements IOParams {
                 lcd.println(DriverStationLCD.Line.kUser2, 1, "Miscellaneus...      ");
                 s = "Gyro " + StringUtils.format(/* TODO */ 0, 3, 2);
                 lcd.println(DriverStationLCD.Line.kUser3, 1, s);
-                lcd.println(DriverStationLCD.Line.kUser4, 1, StringUtils.TODO_SPACES_21);
-                lcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
+                lcd.println(DriverStationLCD.Line.kUser4, 1, "Loader Out:  " + StringUtils.format(loader.isExtended()));
+                lcd.println(DriverStationLCD.Line.kUser5, 1, "Loader In:   " + StringUtils.format(loader.isRetracted()));
                 lcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);        
                 diagOff = false;
                 break;
