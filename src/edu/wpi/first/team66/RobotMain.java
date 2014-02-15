@@ -352,13 +352,15 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         
         if (inputs.getRollOutButton())
         {
-            //TODO
-            loader.eject();
+            loader.setRollerState(Loader.ROLLER_OUT);
         }
         else if (inputs.getRollInButton())
         {
-            //TODO
-            loader.stopEjecting();
+            loader.setRollerState(Loader.ROLLER_IN);
+        }
+        else
+        {
+            loader.setRollerState(Loader.ROLLER_OFF);
         }
         
         if (inputs.getShootButton()) {

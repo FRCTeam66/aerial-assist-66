@@ -7,17 +7,19 @@ import edu.wpi.first.wpilibj.SpeedController;
 
 public class Loader implements IOParams {
     
-    private final Solenoid armRetractSolenoid;
+    public static final int ROLLER_IN = -1;
+    public static final int ROLLER_OFF = 0;
+    public static final int ROLLER_OUT = 1;
     
+    private final Solenoid armRetractSolenoid;
     private final Solenoid armExtendSolenoid;
     
     private final SpeedController ballRollerMotor;
     
     private final DigitalInput armExtendedSwitch;
-    
     private final DigitalInput armRetractedSwitch;
     
-    private boolean ejecting = false;
+    private int ballRollerState = ROLLER_OFF;
     
     public Loader(
             Solenoid armRetractSolenoid,
@@ -33,10 +35,7 @@ public class Loader implements IOParams {
         this.armRetractedSwitch = armRetractedSwitch;
         
         Loader.this.retract();
-    }
-    
-    public boolean isEjecting() {
-        return ejecting;
+        Loader.this.setRollerState(ROLLER_OFF);
     }
     
     public boolean isRetracting() {
@@ -59,29 +58,35 @@ public class Loader implements IOParams {
         return ballRollerMotor.get();
     }
     
+    public int getRollerState() {
+        return ballRollerState;
+    }
+    
     public void extend() {
         armRetractSolenoid.set(false);
         armExtendSolenoid.set(true);
-        ballRollerMotor.set(BALL_ROLLER_MOTOR_LOAD_ON);
-        ejecting = false;
     }
     
     public void retract() {
         armExtendSolenoid.set(false);
         armRetractSolenoid.set(true);
-        ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
-        ejecting = false;
     }
     
-    public void eject() {
-        ballRollerMotor.set(BALL_ROLLER_MOTOR_EJECT_ON);
-        armExtendSolenoid.set(ARM_EXTEND_SOLENOID_RETRACT);
-        armRetractSolenoid.set(ARM_RETRACT_SOLENOID_RETRACT);
-        ejecting = true;
-    }
-    
-    public void stopEjecting() {
-        ballRollerMotor.set(BALL_ROLLER_MOTOR_OFF);
-        ejecting = false;
+    public void setRollerState(int state) {
+        ballRollerState = state;
+        switch(state){
+            case ROLLER_IN:
+                ballRollerMotor.set(BALL_ROLLER_MOTOR_LOAD_ON);
+                break;
+            case ROLLER_OFF:
+                ballRollerMotor.set(BALL_ROLLER_MOTOR_OFF);
+                break;
+            case ROLLER_OUT:
+                ballRollerMotor.set(BALL_ROLLER_MOTOR_EJECT_ON);
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal Roller State Argument:" + state);
+        }
+
     }
 }
