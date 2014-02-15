@@ -258,10 +258,13 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
         
         AnalogChannel ballLoadedSensor = new AnalogChannel(BALL_LOADED_SENSOR_AI_CHANNEL);
         
+        AnalogChannel shooterAbsoluteAngle = new AnalogChannel(ARM_POSITION_POT_AI_CHANNEL);
+        
         shooter = new Shooter(
                 shooterMotor,
                 shooterMotorEncoder,
                 ballLoadedSensor,
+                shooterAbsoluteAngle,
                 shooterCockedLimitSwitch,
                 shooterShotLimitSwitch,
                 loader);
