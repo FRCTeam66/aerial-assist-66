@@ -16,10 +16,14 @@ public class Shooter implements IOParams {
     private static final int STATE_STOPPING = 4;
     private static final int STATE_RESETTING = 5;
     
+    private static final double VOLT_TO_ANGLE_SLOPE = -148.76d;
+    private static final double VOLT_TO_ANGLE_INTERCEPT = 747.52d;
+    
     private final SpeedController shooterMotor;
     private final Encoder shooterMotorEncoder;
     
     private final AnalogChannel ballLoadedSensor;
+    private final AnalogChannel shooterAbsoluteAngle;
 
     private final DigitalInput shooterCockedLimitSwitch;
     private final DigitalInput shooterShotLimitSwitch;
@@ -32,6 +36,7 @@ public class Shooter implements IOParams {
             SpeedController shooterMotor,
             Encoder shooterMotorEncoder,
             AnalogChannel ballLoadedSensor,
+            AnalogChannel shooterAbsoluteAngle,
             DigitalInput shooterCockedLimitSwitch,
             DigitalInput shooterShotLimitSwitch,
             Loader loader)
@@ -39,6 +44,7 @@ public class Shooter implements IOParams {
         this.shooterMotor = shooterMotor;
         this.shooterMotorEncoder = shooterMotorEncoder;
         this.ballLoadedSensor = ballLoadedSensor;
+        this.shooterAbsoluteAngle = shooterAbsoluteAngle;
         this.shooterCockedLimitSwitch = shooterCockedLimitSwitch;
         this.shooterShotLimitSwitch = shooterShotLimitSwitch;
         this.loader = loader;
@@ -139,6 +145,12 @@ public class Shooter implements IOParams {
 //        }
     }
     
+    public double getShooterAngle()
+    {
+        //y=mx+b conversion of position sensor voltage to angle in degrees
+        
+        return((VOLT_TO_ANGLE_SLOPE * shooterAbsoluteAngle.getVoltage()) + VOLT_TO_ANGLE_INTERCEPT);
+    }
     public double getShooterRate()
     {
         return shooterMotorEncoder.getRate();
@@ -159,9 +171,9 @@ public class Shooter implements IOParams {
         return false;
     }
     
-    private boolean isInCockedPosition()
+    public boolean isInCockedPosition()
     {
-        return false;
+        return shooterCockedLimitSwitch.get() == LIMIT_SWITCH_PRESSED ? true:false;
     }
     
     /**
