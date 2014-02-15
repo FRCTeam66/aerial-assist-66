@@ -43,6 +43,8 @@ public class Shooter implements IOParams {
         this.shooterCockedLimitSwitch = shooterCockedLimitSwitch;
         this.shooterShotLimitSwitch = shooterShotLimitSwitch;
         this.loader = loader;
+        
+        shooterMotor.set(0);
     }
     
     public boolean isBallInShooter()
@@ -67,73 +69,75 @@ public class Shooter implements IOParams {
     
     public void update(double deltaTime)
     {
-        switch (currentState) {
-            // Shooting not in process when in this state.
-            case STATE_COCKED_AND_IDLE:
-                break;
-
-            case STATE_PREFIRE_CHECKS:
-
-                // Is the arm cocked and ready to shoot?
-                if (shooterCockedLimitSwitch.get () == ARM_NOT_COCKED) {
-                    break;
-                }
-
-                // Is there a ball in the shooter?
-                if (isBallInShooter () == BALL_NOT_IN_SHOOTER) {
-                    break;
-                }
-
-                // Is the arm in the Extend position?
-                if (!loader.isExtended()) {
-                    loader.extend();
-                    break;
-                }
-                
-                currentState = STATE_SHOOTING;
-                // TODO transition actions
-                
-                break;
-            case STATE_CHAMBER_BALL:
-                if (isBallChambered())
-                {
-                    currentState = STATE_SHOOTING;
-                    break;
-                }
-                break;
-            case STATE_SHOOTING:
-
-                if (isTagetSpeedReached())
-                {
-                    currentState = STATE_STOPPING;
-                }
-                
-                // TODO tune PID controller
-                
-                break;
-                
-            // Stop the shootere motor when either the encoder has travened the desired
-            // distance or the shooterMotorLimitSwith is pressed by thhe arm.
-            case STATE_STOPPING:
-                
-                if (isStopped())
-                {
-                    currentState = STATE_RESETTING;
-                    break;
-                }
-            
-                break;
-                
-            case STATE_RESETTING:
-                
-                if (isInCockedPosition())
-                {
-                    currentState = STATE_COCKED_AND_IDLE;
-                    break;
-                }
-                
-                break;
-        }
+        shooterMotor.set(0);
+//        
+//        switch (currentState) {
+//            // Shooting not in process when in this state.
+//            case STATE_COCKED_AND_IDLE:
+//                break;
+//
+//            case STATE_PREFIRE_CHECKS:
+//
+//                // Is the arm cocked and ready to shoot?
+//                if (shooterCockedLimitSwitch.get () == ARM_NOT_COCKED) {
+//                    break;
+//                }
+//
+//                // Is there a ball in the shooter?
+//                if (isBallInShooter () == BALL_NOT_IN_SHOOTER) {
+//                    break;
+//                }
+//
+//                // Is the arm in the Extend position?
+//                if (!loader.isExtended()) {
+//                    loader.extend();
+//                    break;
+//                }
+//                
+//                currentState = STATE_SHOOTING;
+//                // TODO transition actions
+//                
+//                break;
+//            case STATE_CHAMBER_BALL:
+//                if (isBallChambered())
+//                {
+//                    currentState = STATE_SHOOTING;
+//                    break;
+//                }
+//                break;
+//            case STATE_SHOOTING:
+//
+//                if (isTagetSpeedReached())
+//                {
+//                    currentState = STATE_STOPPING;
+//                }
+//                
+//                // TODO tune PID controller
+//                
+//                break;
+//                
+//            // Stop the shootere motor when either the encoder has travened the desired
+//            // distance or the shooterMotorLimitSwith is pressed by thhe arm.
+//            case STATE_STOPPING:
+//                
+//                if (isStopped())
+//                {
+//                    currentState = STATE_RESETTING;
+//                    break;
+//                }
+//            
+//                break;
+//                
+//            case STATE_RESETTING:
+//                
+//                if (isInCockedPosition())
+//                {
+//                    currentState = STATE_COCKED_AND_IDLE;
+//                    break;
+//                }
+//                
+//                break;
+//        }
     }
     
     public double getShooterRate()

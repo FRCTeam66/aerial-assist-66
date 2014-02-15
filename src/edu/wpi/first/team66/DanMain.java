@@ -300,12 +300,18 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         armStick    = new Joystick(3);
 
         // Setup tank drive
-        Encoder leftMotorEncoder     = new Encoder(DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_0,
-                                           DIO_SLOT, LEFT_WHEEL_ENCODER_BIT_1);
+        Encoder leftMotorEncoder = new Encoder(
+                DIO_SLOT,
+                LEFT_WHEEL_ENCODER_BIT_0,
+                DIO_SLOT,
+                LEFT_WHEEL_ENCODER_BIT_1);
         
         
-        Encoder rightMotorEncoder    = new Encoder(DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_0,
-                                           DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_1);
+        Encoder rightMotorEncoder = new Encoder(
+                DIO_SLOT,
+                RIGHT_WHEEL_ENCODER_BIT_0,
+                DIO_SLOT,
+                RIGHT_WHEEL_ENCODER_BIT_1);
         
         tankDrive = new TankDrive(
                 new Victor(DIO_SLOT, LEFT_MOTOR_PWM_CHANNEL),

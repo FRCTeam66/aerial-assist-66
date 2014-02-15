@@ -58,13 +58,16 @@ public class TankDrive implements IOParams, RobotParams {
         this.rightMotor = rightMotor;
         this.highShifterSolenoid = highShifterSolenoid;
         this.lowShifterSolenoid = lowShifterSolenoid;
+        
         this.leftMotorEncoder = leftMotorEncoder;
         leftMotorEncoder.setDistancePerPulse(DRIVE_ENCODER_INCHES_PER_PULSE);
+        leftMotorEncoder.setReverseDirection(IS_LEFT_DRIVE_REVERSED);
         leftMotorEncoder.start();
         
         this.rightMotorEncoder = rightMotorEncoder;
         rightMotorEncoder.start();
         rightMotorEncoder.setDistancePerPulse(DRIVE_ENCODER_INCHES_PER_PULSE);
+        rightMotorEncoder.setReverseDirection(IS_RIGHT_DRIVE_REVERSED);
         
         shiftLowGear();
     }
@@ -118,8 +121,8 @@ public class TankDrive implements IOParams, RobotParams {
     
     public void setSpeed(double leftSpeed, double rightSpeed)
     {
-        leftMotor.set(leftSpeed);
-        rightMotor.set(rightSpeed);
+        setLeftSpeed(leftSpeed);
+        setRightSpeed(rightSpeed);
         setTargetSpeed(leftSpeed, rightSpeed);
     }
     
@@ -132,8 +135,8 @@ public class TankDrive implements IOParams, RobotParams {
     public void stop()
     {
         isMovingDistance = false;
-        leftMotor.set(0.0);
-        rightMotor.set(0.0);
+        setLeftSpeed(0.0);
+        setRightSpeed(0.0);
         targetLeftSpeed = 0.0;
         targetRightSpeed = 0.0;
     }
@@ -162,21 +165,41 @@ public class TankDrive implements IOParams, RobotParams {
          */
         double maxDelta = MAX_ACCELERATION * deltaTime;
         
-        double currentLeftSpeed = leftMotor.get();
-        double currentRightSpeed = rightMotor.get();
+        double currentLeftSpeed = getCommandedLeftSpeed();
+        double currentRightSpeed = getCommandedRightSpeed();
         
         /**
          * Move towards target speeds by clamping to
          * currentSpeed +/- maxDelta
          */
-        leftMotor.set(Math2.clamp(
+        setLeftSpeed(Math2.clamp(
                 currentLeftSpeed - maxDelta,
                 currentLeftSpeed + maxDelta,
                 targetLeftSpeed));
         
-        rightMotor.set(Math2.clamp(
+        setRightSpeed((IS_RIGHT_DRIVE_REVERSED ? -1 : 1) * Math2.clamp(
                 currentRightSpeed - maxDelta,
                 currentRightSpeed + maxDelta,
                 targetRightSpeed));
+    }
+        
+    private double getCommandedLeftSpeed()
+    {
+        return (IS_LEFT_DRIVE_REVERSED ? -1 : 1) * leftMotor.get();
+    }
+    
+    private double getCommandedRightSpeed()
+    {
+        return (IS_RIGHT_DRIVE_REVERSED ? -1 : 1) * rightMotor.get();
+    }
+    
+    private void setLeftSpeed(double speed)
+    {
+        leftMotor.set((IS_LEFT_DRIVE_REVERSED ? -1 : 1) * speed);
+    }
+
+    private void setRightSpeed(double speed)
+    {
+        rightMotor.set((IS_RIGHT_DRIVE_REVERSED ? -1 : 1) * speed);
     }
 }

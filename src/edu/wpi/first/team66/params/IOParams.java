@@ -63,6 +63,8 @@ public interface IOParams {
 
     static final double STEERING_MOTOR_DEADBAND = 0.15;     // This amount +/- in the X-axis to drive straight.
     
+    static final boolean IS_LEFT_DRIVE_REVERSED = true;
+    static final boolean IS_RIGHT_DRIVE_REVERSED = false;
     
     // Driver joystick buttons.
     static final int DRIVER_SHIFTER_TRIGGER = 1;            // Switch the logical front of the bot for easier steering.
