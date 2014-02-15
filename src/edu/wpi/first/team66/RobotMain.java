@@ -141,6 +141,9 @@
 
 package edu.wpi.first.team66;
 
+import edu.wpi.first.team66.autonomous.DoNothingState;
+import edu.wpi.first.team66.autonomous.StateMachine;
+import edu.wpi.first.team66.autonomous.mode1.Mode1InitState;
 import java.lang.String;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -184,6 +187,8 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
     private Loader loader = null;
     
     private Shooter shooter = null;
+    
+    private StateMachine autoStateMachine = null;
     
     // Driver Station and Diagnostics Display
     DriverStation ds;                               // Define the drivers station object
@@ -364,6 +369,9 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
                          ((autonomousBit1.get()) ? 2 : 0) |
                          ((autonomousBit0.get()) ? 1 : 0);
         System.out.println("Autonomous mode: " + StringUtils.format(autonomousMode, 2));
+        
+        autoStateMachine = new StateMachine();
+        
         // Switches behave just like a limit switch on a Digital IO.
 
         diagnosticSelector = new AnalogChannel(DIAGNOSTIC_SELECTOR_AI_CHANNEL);
@@ -394,6 +402,17 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
         periodicTimer.reset();
         timer.start();
         airCompressor.start();
+        
+        switch (autonomousMode) {
+            case AMODE_DO_NOTHING:
+                autoStateMachine.setState(new DoNothingState());
+                break;
+            case AMODE_DRIVE_FORWARD:
+                autoStateMachine.setState(new Mode1InitState());
+                break;
+            default:
+                autoStateMachine.setState(new DoNothingState());
+        }
     }
 
     /**
@@ -402,36 +421,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams {
     public void autonomousPeriodic() {
         displayDiagnostics();
 
-        aStatePast = aState;                        // Save the past state.
-        aState = aStateNext;                        // Set the new state.
-
-        // Do the appropriate autonomous reotine base upon the switch settings.
-        switch (autonomousMode) {
-
-            // Autonomous 0 - Do nothing.
-            case AMODE_DO_NOTHING:
-                autonomousDoNothing();
-                break;
-
-            // Autonomous 1 - Drive forward.
-            case AMODE_DRIVE_FORWARD:
-                autonomous1();
-                break;
-
-            // Autonomous 2 - Shoot the ball at the goal that you are aimed at, then move ahead.
-            case AMODE_SHOOT_THEN_MOVE:
-                autonomous2();
-                break;
-
-            // Autonomous 3 - Look for the illuminated goal with the camera, turn, shoot, turn, drive forward.
-            case AMODE_AIM_SHOOT_DRIVE_FORWARD:
-                autonomous3();
-                break;
-
-            default:
-                System.out.println("Unknown autonomous mode:" + StringUtils.format(autonomousMode, 3));
-                autonomousMode = 0;                 // Pretend there is no autonomous mode.
-        }
+        autoStateMachine.update(tankDrive, loader, shooter);
         
         double deltaTime = periodicTimer.getDeltaTime();
         shooter.update(deltaTime);
