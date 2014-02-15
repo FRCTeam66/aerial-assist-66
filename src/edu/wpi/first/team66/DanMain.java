@@ -436,8 +436,8 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
     public void teleopInit () {
         periodicTimer.reset();
-        airCompressor.start();                      // Start the air compressor.
-    } // public void teleopInit ()
+        airCompressor.start();
+    }
 
 
 
@@ -495,39 +495,11 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         }
         else if (loader.isEjecting()) {
             loader.stopEjecting();
-            // Leave the roller motor on as long as the Eject button is pressed.
-        } // if (armStick.getRaw (joyStickArmEjectButton) == kJoystickButtonPressed)
+        }
 
-        // Is the shotting trigger button pressed?
+        // Is the shooting trigger button pressed?
         if (armStick.getRawButton (JOYSTICK_ARM_SHOOT_BUTTON) == JOYSTICK_BUTTON_PRESSED) {
-            if (shootButtonPressed == false) {      // Yes.  Was the shoot button just pressed?
-                shootButtonPressed = true;          // Yes, set a flag.
-                shooter.shoot();
-            }
-        }
-        // Else the shooting trigger button released?
-        else {              
-            if (shootButtonPressed == true) {       // Was the shoot button just released?
-                shootButtonPressed = false;         // Yes, set a flag.
-                shooter.stop();                   // Reset the Shoot function state machine.
-            }
-        }
-
-        // Manualy toggle the camera lights.
-        b = armStick.getRawButton (JOYSTICK_ARM_LIGHT_TOGGLE);
-        if (b != JOYSTICK_BUTTON_PRESSED) {          // Is the button pressed?
-            if (cameraLightsButtonWasPressed == false) {
-                cameraLightsButtonWasPressed = true; // Remember that the button is now pressed in.
-                if (cameraLightToggle) {            // Yes.  Was the shoot button just pressed?
-                    cameraLights.set (cameraLightsOff); // Set Default value to off.
-                    cameraLightToggle = false;
-                } else {        
-                    cameraLights.set (cameraLightsOn);
-                    cameraLightToggle = true;
-                }
-            }                                       // The button was alread pressedin.
-        } else {
-            cameraLightsButtonWasPressed = false;   // Remember that the button is no longer pressed pressed.
+            shooter.shoot();
         }
 
         double deltaTime = periodicTimer.getDeltaTime();
@@ -542,7 +514,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     public void testPeriodic() {
     
     }
-
 
     // **********  Other Non-FIRST functions  **********
 
@@ -586,10 +557,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     }
 
     void autonomous3() {
-    }
-
-    void moveStop () {
-        tankDrive.stop();
     }
 
     void displayDiagnostics () {
