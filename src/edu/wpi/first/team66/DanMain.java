@@ -190,10 +190,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     DriverStationLCD dslcd;
     Hand hand;                                      // Required for the trigger function
     
-    //double driverStickXAxis = 0.0;                // Save this for robot diagnostics
-    //double driverStickYAxis = 0.0;
-
-
     // Declare variables for the two joysticks being used
     Joystick driveStickL;                           // Joystick Left  (tank drive)
     Joystick driveStickR;                           // Joystick Right (tank drive)
@@ -211,24 +207,19 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     // Time of autonomous or telop modes
     Timer timer = new Timer();
 
-    private int autonomousMode = 0;                         // Mode is a number between 0 and 7.
-    double autonomousStopTime = 0.0;                // Used as safety time in autonomous.
+    private int autonomousMode = 0;     // Mode is a number between 0 and 7.
+    double autonomousStopTime = 0.0;    // Used as safety time in autonomous.
 
-    DigitalInput autonomousBit0;                    // Digital input objects
+    DigitalInput autonomousBit0;
     DigitalInput autonomousBit1;
     DigitalInput autonomousBit2;
 
     // Ball Roller Motor Declarations and Constants.
 
-    DigitalInput armExtendLimitSwitch;              // Limit Switches.
+    DigitalInput armExtendLimitSwitch;
     DigitalInput armRetractLimitSwitch;
 
     AnalogChannel armPosition;
-
-
-//    final double kShootAndCockMotorOn  = 1.0;       // This will be controlled in a PID loop.
-
-
 
 // TODO CALIBRATE if needed
 
@@ -257,10 +248,7 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     boolean cameraLightsButtonWasPressed;           // Status of camera lightbutton from previous message.
 
     Compressor airCompressor;                       // Define the air compressor object.
-
-    Solenoid highShifterSolenoid;
-    Solenoid  lowShifterSolenoid;
-
+    
     final boolean lowShifterHigh    = false; // To shift high gear
     final boolean higherShifterhigh = true;
 
@@ -279,41 +267,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     // Move code variables and constants.  ----------------------
     long speed;                                     // ??Track robot speed every 26.2 ms.
 
-// TODO dan get rid of this!
-    boolean offenseDefense;                         // Which end of the robot is the front.
-
-    double degrees;                                 // Yaw rate sensor value in degrees from gyro.getAngele ().
-    double degreesStart = 0.0d;                     // Starting angle OF THE MOVE SET IN MOVEsTART.
-
-    double distance = 0.0d;
-    double ramp = 0.0d;
-
-    int moveState     = 0;                          // Move state machine states.
-    int moveNextState = 0;
-    int movePastState = 0;
-
-    double  maxPower = 1.0;                         // This value is initial power setting.
-
-    Timer moveTimer;
-    double startTime;                               // Starting time for the move.
-    double tm = -1;                                 // Time of the last message from the Field Control System.
-    
-    double endDistanceLeft = 0;                     // Ending position in clicks.
-    double endDistanceRight = 0;
-
-    double leftPowerMax  = 1.0;                     // These values are power setting
-    double rightPowerMax = 1.0;                     // values of -1.0 to +1.0.
-
-    // Variable that change depending on Offence or Defence switch.
-    // Recall that the robot has two front ends depending on O/D switch.
-    final double BRAKE_FORCE = -0.1;                // 
-    double brakeForce = 0.0;
-
-    final double DEGREES_MARGIN = 1.0;              // Allow +/- N degrees variation in the direction.
-    
-    double compensation = 0;                        // Amount of wheel power correction is computed 
-    // ----------------------                       // based upon power setting.
-    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -355,10 +308,12 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
                                            DIO_SLOT, RIGHT_WHEEL_ENCODER_BIT_1);
         
         tankDrive = new TankDrive(
-            new Victor(DIO_SLOT, LEFT_MOTOR_PWM_CHANNEL),
-            new Victor(DIO_SLOT, RIGHT_MOTOR_PWM_CHANNEL),
-            leftMotorEncoder,
-            rightMotorEncoder);
+                new Victor(DIO_SLOT, LEFT_MOTOR_PWM_CHANNEL),
+                new Victor(DIO_SLOT, RIGHT_MOTOR_PWM_CHANNEL),
+                new Solenoid(HIGH_SHIFTER_SOLENOID_SHIFTER_SIO_CHANNEL),
+                new Solenoid(LOW_SHIFTER_SOLENOID_SIO_CHANNEL),
+                leftMotorEncoder,
+                rightMotorEncoder);
         
         // Setup loader system
         
@@ -406,7 +361,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         // Switches behave just like a limit switch on a Digital IO.
 
         diagnosticSelector = new AnalogChannel(DIAGNOSTIC_SELECTOR_AI_CHANNEL);
-        //System.out.println("diagnosticSelector: " + format(diagnosticSelector.getAverageValue (),6, 3));
 
         shootButtonPressed = false;                 // Assume the shoot button is not pressure
 
@@ -417,7 +371,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
         cameraLights = new Relay (DIO_SLOT, CAMERA_LIGHTS_RELAY_RIO_CHANNEL, Relay.Direction.kBoth);
         cameraLightsOn   = Relay.Value.kForward;
-        //cameraLightsOn = Relay.Value.kReverse;
         cameraLightsOff  = Relay.Value.kOff;
         cameraLights.set (cameraLightsOff);         // Set Default value to off.
         cameraLightToggle = false;
@@ -425,37 +378,23 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         cameraLightsButtonPressed = JOYSTICK_BUTTON_NOT_PRESSED;
         cameraLightsButtonWasPressed = false;
 
-        highShifterSolenoid = new Solenoid (1);     // Instantiate the Solenoid objects to control the valves.
-        lowShifterSolenoid  = new Solenoid (2);
-
-        lowShifterSolenoid.set  (lowShifterHigh);    // Initially set it to high gear.
-        highShifterSolenoid.set (higherShifterhigh); // Initially set it to high gear.
-
         timer = new Timer ();                       // Instantiate the match timer shootDiag6
         timer.reset();
 
-        moveTimer = new Timer ();
-        moveTimer.reset ();
-
         autoDiag5 = StringUtils.TODO_SPACES_21;
-    } // public void robotInit()
-
-
+    }
 
     public void autonomousInit () {
         periodicTimer.reset();
-        timer.start();                              // Start the timer
-        airCompressor.start();                      // Startthe air compressor.
-        
-    } // public void autonomousInit ()
+        timer.start();
+        airCompressor.start();
+    }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        // Call the diagnostic display functions.
-        // This function will decide what to do.
-        displayDiagnostics ();
+        displayDiagnostics();
 
         aStatePast = aState;                        // Save the past state.
         aState = aStateNext;                        // Set the new state.
@@ -486,7 +425,6 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
             default:
                 System.out.println("Unknown autonomous mode:" + StringUtils.format(autonomousMode, 3));
                 autonomousMode = 0;                 // Pretend there is no autonomous mode.
-
         }
         
         double deltaTime = periodicTimer.getDeltaTime();
@@ -521,11 +459,9 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
         i = (driveStickL.getRawButton(DRIVER_SHIFTER_TRIGGER) ? 2 : 0) +
             (driveStickR.getRawButton(DRIVER_SHIFTER_TRIGGER) ? 1 : 0);
         if (i == 0) {                               // Neither trigger button is pressed,
-            lowShifterSolenoid.set  (lowShifterHigh); // shift to high speed.
-            highShifterSolenoid.set (higherShifterhigh);
+            tankDrive.shiftHighGear();
         } else {                                    // A trigger button is pressed,
-            highShifterSolenoid.set (highShifterLow); // shift to low gear.
-            lowShifterSolenoid.set  (lowShifterLow);
+            tankDrive.shiftLowGear();
         }
 
         // Set the motors speed.
@@ -610,13 +546,9 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
     // **********  Other Non-FIRST functions  **********
 
-    // Autonomous 0 - Do nothing.
     void autonomousDoNothing() {
-        // Your autonomous code here.
-    } // autonomous0()
+    }
 
-
-    // Autonomous 1
     void autonomous1() {
         aState = aStateNext;
         
@@ -642,15 +574,11 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
             break;
     
         default:
-            // error message.
-            break;
+            throw new RuntimeException("invalid autonomous1 state");
+        }
         
-        } // Switch(aState) {
-        
-    } // autonomous1()
+    }
 
-
-    // autonomous 2
     // Don't used the camera in this autonomous program.
     // Pick up a ball, move forward, shoot and move forward some more.
     void autonomous2() {
@@ -658,22 +586,11 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
     }
 
     void autonomous3() {
-        // Your autonomous code here.
-   
-    } // autonomous3()
+    }
 
-    // Stop the robot NOW!
-    // Just tell the state machine to end the move.
     void moveStop () {
-        // Start braking.
-        // This is the fastest way to stop.
-        moveNextState = 3;
-
-        // Apply brakes.
         tankDrive.stop();
-
-    } // Move_Stop ()
-
+    }
 
     void displayDiagnostics () {
         int d;                                     // Which diagnostic to run.
@@ -814,8 +731,7 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
                                                              // 123456789012345678901
                 dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
                     + " " + StringUtils.format (diagnosticSelector.getValue (),5));
-                tm = shootTime.get ()/10.0d;                 // Make id 1/1000 to 1/100 of sec.
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter        " + StringUtils.format(tm, 3, 2));
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter        " + StringUtils.format(0, 3, 2));
                 dslcd.println(DriverStationLCD.Line.kUser3, 1, 
                     "Ball Loaded " + (shooter.isBallInShooter() ? "Y " : "N "));
                 s = "Ckd " + (shooter.isCocked() ? "Y " : "N ") +
@@ -831,7 +747,7 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
             case 5:
                 dslcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
                     + " " + StringUtils.format (diagnosticSelector.getValue (),5));
-                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter 2      " + StringUtils.format(tm, 3, 2));
+                dslcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter 2      " + StringUtils.format(0, 3, 2));
                 dslcd.println(DriverStationLCD.Line.kUser3, 1,
                     "Arm Ext LS " + ((armExtendLimitSwitch.get()==LIMIT_SWITCH_PRESSED) ? "P" : "_") + "         ");
                 dslcd.println(DriverStationLCD.Line.kUser4, 1,
@@ -916,4 +832,4 @@ public class DanMain extends IterativeRobot implements IOParams, StateParams {
 
     } // void displayDiagnostics ()
 
-} // public class RobotTemplate extends IterativeRobot
+}

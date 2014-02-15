@@ -4,6 +4,7 @@ import edu.wpi.first.team66.params.IOParams;
 import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedController;
 
 public class Shooter implements IOParams {
@@ -18,11 +19,11 @@ public class Shooter implements IOParams {
     
     private final SpeedController shooterMotor;
     private final Encoder shooterMotorEncoder;
+    
+    private final AnalogChannel ballLoadedSensor;
 
-    private final AnalogChannel ballLoadedSensor;                 // Used to detect if a ball is in the shooter mechanism.
-
-    private final DigitalInput shooterCockedLimitSwitch;          // Limit Switches.
-    private final DigitalInput shooterShotLimitSwitch;            // Shooter iss moved all the way.
+    private final DigitalInput shooterCockedLimitSwitch;
+    private final DigitalInput shooterShotLimitSwitch;
 
     private final Loader loader;
     

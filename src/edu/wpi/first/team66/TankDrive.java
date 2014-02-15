@@ -10,6 +10,7 @@ import edu.wpi.first.team66.math.Math2;
 import edu.wpi.first.team66.params.IOParams;
 import edu.wpi.first.team66.params.RobotParams;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedController;
 
 public class TankDrive implements IOParams, RobotParams {
@@ -28,6 +29,10 @@ public class TankDrive implements IOParams, RobotParams {
     
     private final SpeedController rightMotor;
     
+    private final Solenoid highShifterSolenoid;
+    
+    private final Solenoid  lowShifterSolenoid;
+    
     private final Encoder leftMotorEncoder;
     
     private final Encoder rightMotorEncoder;
@@ -41,9 +46,18 @@ public class TankDrive implements IOParams, RobotParams {
     private double distanceMaxSpeed = 0.0;
     
     
-    public TankDrive(SpeedController leftMotor, SpeedController rightMotor, Encoder leftMotorEncoder, Encoder rightMotorEncoder) {
+    public TankDrive(
+            SpeedController leftMotor,
+            SpeedController rightMotor,
+            Solenoid highShifterSolenoid,
+            Solenoid lowShifterSolenoid,
+            Encoder leftMotorEncoder,
+            Encoder rightMotorEncoder)
+    {
         this.leftMotor = leftMotor;
         this.rightMotor = rightMotor;
+        this.highShifterSolenoid = highShifterSolenoid;
+        this.lowShifterSolenoid = lowShifterSolenoid;
         this.leftMotorEncoder = leftMotorEncoder;
         leftMotorEncoder.setDistancePerPulse(DRIVE_ENCODER_INCHES_PER_PULSE);
         leftMotorEncoder.start();
@@ -51,6 +65,20 @@ public class TankDrive implements IOParams, RobotParams {
         this.rightMotorEncoder = rightMotorEncoder;
         rightMotorEncoder.start();
         rightMotorEncoder.setDistancePerPulse(DRIVE_ENCODER_INCHES_PER_PULSE);
+        
+        shiftLowGear();
+    }
+    
+    public void shiftLowGear()
+    {
+        highShifterSolenoid.set(false);
+        lowShifterSolenoid.set(true);
+    }
+    
+    public void shiftHighGear()
+    {
+        lowShifterSolenoid.set(false);
+        highShifterSolenoid.set(true);
     }
     
     public double getAverageEncoderDistance()
