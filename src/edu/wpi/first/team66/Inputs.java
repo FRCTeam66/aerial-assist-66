@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.Joystick;
 
 public class Inputs implements IOParams {
     
-    // Declare variables for the two joysticks being used
     private final Joystick driveStickL;
     private final Joystick driveStickR;
     private final Joystick armStick;

@@ -32,7 +32,7 @@ public class Loader implements IOParams {
         this.armExtendedSwitch = armExtendedSwitch;
         this.armRetractedSwitch = armRetractedSwitch;
         
-        retract();
+        Loader.this.retract();
     }
     
     public boolean isEjecting() {
@@ -62,7 +62,7 @@ public class Loader implements IOParams {
     public void extend() {
         armRetractSolenoid.set(false);
         armExtendSolenoid.set(true);
-        ballRollerMotor.set (BALL_ROLLER_MOTOR_LOAD_ON);     // Also, turn on the motor to pickup the ball.
+        ballRollerMotor.set(BALL_ROLLER_MOTOR_LOAD_ON);
         ejecting = false;
     }
     
@@ -74,14 +74,14 @@ public class Loader implements IOParams {
     }
     
     public void eject() {
-        ballRollerMotor.set (BALL_ROLLER_MOTOR_EJECT_ON);
-        armExtendSolenoid.set  (armRetractSolenoidRetract); // Retract the arm to get it to touch
-        armRetractSolenoid.set (armExtendSolenoidRetract);  // the ball in the shooter to eject it.
+        ballRollerMotor.set(BALL_ROLLER_MOTOR_EJECT_ON);
+        armExtendSolenoid.set(armRetractSolenoidRetract);
+        armRetractSolenoid.set(armExtendSolenoidRetract);
         ejecting = true;
     }
     
     public void stopEjecting() {
-        ballRollerMotor.set (BALL_ROLLER_MOTOR_OFF);
+        ballRollerMotor.set(BALL_ROLLER_MOTOR_OFF);
         ejecting = false;
     }
 }
