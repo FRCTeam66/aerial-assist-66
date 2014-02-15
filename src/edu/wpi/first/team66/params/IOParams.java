@@ -29,8 +29,9 @@ public interface IOParams {
     // Solenoid IO Channels
     static final int HIGH_SHIFTER_SOLENOID_SHIFTER_SIO_CHANNEL   = 1;   // Shift to high gear
     static final int LOW_SHIFTER_SOLENOID_SIO_CHANNEL    = 2;   // Shift to low  gear
-    static final int ARM_EXTEND_SOLENOID               = 3;   // Arm extend solenoid
-    static final int ARM_RETRACT_SOLENOID              = 4;   // Arm retrace Solenoid
+    static final int ARM_RETRACT_SOLENOID              = 3;   // Arm retrace Solenoid
+    static final int ARM_EXTEND_SOLENOID               = 4;   // Arm extend solenoid
+    
 
     // Digital IO Channels
     static final int LEFT_WHEEL_ENCODER_BIT_0             = 1;
@@ -67,10 +68,10 @@ public interface IOParams {
     static final boolean IS_RIGHT_DRIVE_REVERSED = false;
     
     // Driver joystick buttons.
-    static final int DRIVER_SHIFTER_TRIGGER = 1;            // Switch the logical front of the bot for easier steering.
-    static final int DRIVE_SWITCH_RED   = 4;                // 
-    static final int DRIVE_SWITCH_WHITE = 3;                // 
-    static final int DRIVE_SWITCH_BLUE  = 5;                // 
+    static final int DRIVER_SHIFTER_TRIGGER     = 1;            // Switch the logical front of the bot for easier steering.
+    static final int DRIVE_SWITCH_RED           = 4;                // 
+    static final int DRIVE_SWITCH_WHITE         = 3;                // 
+    static final int DRIVE_SWITCH_BLUE          = 5;                // 
     static final int DRIVE_SWITCH_POLE_SEEK_OFF = 6;          // 
     static final int DRIVE_SWITCH_POLE_SEEK_ON  = 7;          //
     
@@ -80,16 +81,18 @@ public interface IOParams {
     // Joystic buttons
     static final int JOYSTICK_ARM_SHOOT_BUTTON        = 1;   // Trigger
     static final int JOYSTICK_ARM_LIGHT_TOGGLE        = 6;   // Camera lights toggle
-    static final int JOYSTICK_ARM_EXTEND_BUTTON       = 9;
-    static final int JOYSTIC_ARM_RETRACT_BUTTON      = 8;
     static final int JOYSTICK_ARM_EJECT_BUTTON        = 7;
+    static final int JOYSTIC_ARM_RETRACT_BUTTON       = 8;
+    static final int JOYSTICK_ARM_EXTEND_BUTTON       = 9;
+    
+    
 
     static final boolean JOYSTICK_BUTTON_PRESSED     = true;  // Joystick button is pressed. VERIFY
     static final boolean JOYSTICK_BUTTON_NOT_PRESSED  = false; // Joystick button is NOT pressed. VERIFY
     
     // Ball Roller Motor Declarations and Constants.
-    static final boolean LIMIT_SWITCH_PRESSED    = true;
-    static final boolean LIMIT_SWITCH_NOT_PRESSED = false;
+    static final boolean LIMIT_SWITCH_PRESSED    = false;
+    static final boolean LIMIT_SWITCH_NOT_PRESSED = true;
     
     static final double BALL_ROLLER_MOTOR_LOAD_ON  = -1.00;   // Speed that the rollers will turn Picking-up a ball.
     static final double BALL_ROLLER_MOTOR_EJECT_ON = 1.00;    // Speed that the rollers will turn Ejecting a ball.
