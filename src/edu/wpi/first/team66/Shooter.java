@@ -20,6 +20,9 @@ public class Shooter implements IOParams {
     private static final double VOLT_TO_ANGLE_SLOPE = -148.76d;
     private static final double VOLT_TO_ANGLE_INTERCEPT = 747.52d;
     
+    private static final double TRUSS_TOSS_SPEED = 1.0;
+    private static final double TRUSS_TOSS_RELEASE_ANGLE = 45.0;
+    
     private final SpeedController shooterMotor;
     private final Encoder shooterMotorEncoder;
     
@@ -53,6 +56,11 @@ public class Shooter implements IOParams {
         shooterMotor.set(0);
     }
     
+    public boolean canShoot()
+    {
+        return currentState == STATE_IDLE && isBallInShooter();
+    }
+    
     public boolean isBallInShooter()
     {
         return ballLoadedSensor.getAverageValue() > 110;
@@ -60,7 +68,7 @@ public class Shooter implements IOParams {
     
     public boolean shoot(double speed, double releaseAngle)
     {
-        if (currentState == STATE_IDLE)
+        if (canShoot())
         {
             // think about being able to shoot
         }
@@ -69,11 +77,7 @@ public class Shooter implements IOParams {
     
     public boolean trussToss()
     {
-        if (currentState == STATE_IDLE)
-        {
-            // think about being able to shoot
-        }
-        return false;
+        return shoot(TRUSS_TOSS_SPEED, TRUSS_TOSS_RELEASE_ANGLE);
     }
     
     public boolean stop()
