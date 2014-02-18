@@ -267,6 +267,9 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         PIDController shooterPositionPID = new PIDController(0.02d,0d,0d,shooterAbsoluteAngle,shooterMotor);
         PIDController shooterSpeedPID = new PIDController(0.8d,0d,0d,0.5d,shooterMotorEncoder,shooterMotor);
         
+        airCompressor = new Compressor(NASSON_PRESSURE_SWITCH_DI_CHANNEL, AIR_COMPRESSOR_RELAY_RIO_CHANNEL);
+        airCompressor.start();
+        
         shooter = new Shooter(
                 shooterMotor,
                 shooterMotorEncoder,
@@ -276,6 +279,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
                 shooterShotLimitSwitch,
                 shooterPositionPID,
                 shooterSpeedPID,
+                airCompressor,
                 loader);
 
         // Misc.
@@ -284,9 +288,6 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
 
         autoStateMachine = new StateMachine();
         
-        airCompressor = new Compressor(NASSON_PRESSURE_SWITCH_DI_CHANNEL, AIR_COMPRESSOR_RELAY_RIO_CHANNEL);
-        airCompressor.start();
-
         diagnostics = new DiagnosticDisplay(
                 DriverStation.getInstance(),
                 DriverStationLCD.getInstance(),

@@ -2,6 +2,7 @@ package edu.wpi.first.team66;
 
 import edu.wpi.first.team66.params.IOParams;
 import edu.wpi.first.wpilibj.AnalogChannel;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SpeedController;
@@ -50,6 +51,8 @@ public class Shooter implements IOParams {
     private final PIDController shooterPositionPID;
     private final PIDController shooterSpeedPID;
 
+    private final Compressor compressor;
+    
     private final Loader loader;
     
     public int currentState = STATE_INIT;
@@ -69,6 +72,7 @@ public class Shooter implements IOParams {
             DigitalInput shooterShotLimitSwitch,
             PIDController shooterPositionPID,
             PIDController shooterSpeedPID,
+            Compressor compressor,
             Loader loader)
     {
         this.shooterMotor = shooterMotor;
@@ -79,6 +83,7 @@ public class Shooter implements IOParams {
         this.shooterShotLimitSwitch = shooterShotLimitSwitch;
         this.shooterPositionPID = shooterPositionPID;
         this.shooterSpeedPID = shooterSpeedPID;
+        this.compressor = compressor;
         this.loader = loader;
         
         shooterMotor.set(0);
@@ -186,6 +191,10 @@ public class Shooter implements IOParams {
                 //Shooter in home position, ball in robot, shoot command sent
                 //Check if ball can be launched
                 
+                if (compressor.enabled())
+                {
+                    compressor.stop();
+                }
                 // Is the arm in the Extend position?
                 if (!loader.isExtended()) 
                 {
@@ -240,6 +249,7 @@ public class Shooter implements IOParams {
                 
                 if (isInHomePosition())
                 {
+                    compressor.start();
                     setShooterSpeed(0);
                     setPositionPID(25d,4d);
                     shooterPositionPID.enable();
