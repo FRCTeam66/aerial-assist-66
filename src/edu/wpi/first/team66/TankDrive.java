@@ -73,8 +73,8 @@ public class TankDrive implements IOParams, RobotParams {
     
     public void shiftLowGear()
     {
-        highShifterSolenoid.set(false);
         lowShifterSolenoid.set(true);
+        highShifterSolenoid.set(false);
     }
     
     public void shiftHighGear()
