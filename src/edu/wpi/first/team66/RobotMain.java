@@ -306,13 +306,13 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         
         switch (inputs.getAutonomousMode()) {
             case AMODE_DO_NOTHING:
-                autoStateMachine.setState(new DoNothingState());
+                autoStateMachine.setState(DoNothingState.instance);
                 break;
             case AMODE_DRIVE_FORWARD:
-                autoStateMachine.setState(new Mode1InitState());
+                autoStateMachine.setState(Mode1InitState.instance);
                 break;
             default:
-                autoStateMachine.setState(new DoNothingState());
+                autoStateMachine.setState(DoNothingState.instance);
         }
     }
 
