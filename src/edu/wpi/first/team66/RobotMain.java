@@ -186,6 +186,8 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
     
     private DeltaTimer periodicTimer = null;
     
+    private DeltaTimer continuousTimer = null;
+    
     private TankDrive tankDrive = null;
     
     private Loader loader = null;
@@ -204,6 +206,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
      */
     public void robotInit() {
         periodicTimer = new DeltaTimer();
+        continuousTimer = new DeltaTimer();
         
         Joystick driverController = new Joystick(DRIVER_CONTROLLER_ID);
         Joystick shooterController = new Joystick(SHOOTER_CONTROLLER_ID);
@@ -303,6 +306,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
 
     public void autonomousInit () {
         periodicTimer.reset();
+        continuousTimer.reset();
         airCompressor.start();
         
         switch (inputs.getAutonomousMode()) {
@@ -322,18 +326,19 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
      */
     public void autonomousPeriodic() {
         diagnostics.displayDiagnostics();
-
         autoStateMachine.update(tankDrive, loader, shooter);
-        
+    }
+    
+    public void autonomousContinuous() {
         double deltaTime = periodicTimer.getDeltaTime();
         shooter.update(deltaTime, false /* Do not override loader limit switch state */);
         tankDrive.update(deltaTime);
-
     }
 
 
     public void teleopInit () {
         periodicTimer.reset();
+        continuousTimer.reset();
         airCompressor.start();
     }
 
@@ -392,6 +397,13 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
             
         
         double deltaTime = periodicTimer.getDeltaTime();
+        
+    }
+    
+    public void teleopContinuous()
+    {
+        double deltaTime = continuousTimer.getDeltaTime();
+        
         boolean checkExtended = !inputs.getOverrideLoaderExtendedCheckButton();
         if(inputs.getManualShooterControlButton())
         {
