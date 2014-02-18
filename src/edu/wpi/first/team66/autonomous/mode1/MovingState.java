@@ -8,11 +8,15 @@ import edu.wpi.first.team66.autonomous.State;
 
 public class MovingState implements State {
     
+    public static final State instance = new MovingState();
+    
+    private MovingState(){}
+    
     public State update(TankDrive tankDrive, Loader loader, Shooter shooter)
     {
         if (tankDrive.moveDistanceCompleted())
         {
-            return new DoNothingState();
+            return DoNothingState.instance;
         }
         else
         {

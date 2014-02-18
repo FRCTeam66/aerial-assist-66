@@ -10,7 +10,7 @@ public class StateMachine {
     
     public StateMachine()
     {
-        this.currentState = new DoNothingState();
+        this.currentState = DoNothingState.instance;
     }
     
     public void setState(State state)
