@@ -27,10 +27,11 @@ public interface IOParams {
     static final int AIR_COMPRESSOR_RELAY_RIO_CHANNEL    = 8;
     
     // Solenoid IO Channels
-    static final int HIGH_SHIFTER_SOLENOID_SHIFTER_SIO_CHANNEL   = 1;   // Shift to high gear
-    static final int LOW_SHIFTER_SOLENOID_SIO_CHANNEL    = 2;   // Shift to low  gear
-    static final int ARM_RETRACT_SOLENOID              = 3;   // Arm retrace Solenoid
-    static final int ARM_EXTEND_SOLENOID               = 4;   // Arm extend solenoid
+    
+    static final int LOW_SHIFTER_SOLENOID_SIO_CHANNEL               = 1;   // Shift to low  gear
+    static final int HIGH_SHIFTER_SOLENOID_SHIFTER_SIO_CHANNEL      = 2;   // Shift to high gear
+    static final int ARM_RETRACT_SOLENOID                           = 3;   // Arm retrace Solenoid
+    static final int ARM_EXTEND_SOLENOID                            = 4;   // Arm extend solenoid
     
 
     // Digital IO Channels
@@ -40,8 +41,8 @@ public interface IOParams {
     static final int RIGHT_WHEEL_ENCODER_BIT_1            = 4;
     static final int SHOOTER_ARM_ENCODER_BIT_0            = 5;
     static final int SHOOTER_ARM_ENCODER_BIT_1            = 6;
-    static final int ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL    = 7;  // Digital IO channels for Arm Extend  Limit Switch.
-    static final int ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL   = 8;  // Digital IO channels for Arm Retract Limit Switch.
+    static final int ARM_EXTEND_LIMIT_SWITCH_DI_CHANNEL    = 8;  // Digital IO channels for Arm Extend  Limit Switch.
+    static final int ARM_RETRACT_LIMIT_SWITCH_DI_CHANNEL   = 7;  // Digital IO channels for Arm Retract Limit Switch.
     static final int SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL = 9;  // Digital IO channels for Shooter Cocked Limit Switch.
     static final int SHOOTER_SHOT_LIMIT_SWITCH_DI_CHANNEL   = 10; // Digital IO channels for Shooter Shot Limit Switch.
     static final int NASSON_PRESSURE_SWITCH_DI_CHANNEL    = 11; // Digital IO channels for the Compressor switch.
@@ -87,11 +88,13 @@ public interface IOParams {
     static final double SHOOT_AND_COCK_MOTOR_ON_SLOW_UP = 0.1;  // For moving the shooter to home position in Autonomous.
     static final double SHOOT_AND_COCK_MOTOR_ON_COCK   = -0.2; // Shooter cocking speed.
     
+    static final boolean IS_SHOOTER_MOTOR_REVERSED = true;
+    
     // TODO - Find the correct shooter travel distance. This is a SWAG.
     static final double SHOOTER_DISTANCE = 100.0d;         // Number of encoder clicks to move the shooter to fire.
     static final double PAUSE_AFTER_SHOOTING_TIME = 500.0d;   // Pause 500 milli-seconds (0.5 sec.) after shooting 
                                                     // to let the shooter stop moving.
-    static final double ENCODER_SHOOTER_DISTANCE_PER_PULSE = 1.0d;
+    static final double ENCODER_SHOOTER_DISTANCE_PER_PULSE = 4.64d;// pulses per deg
     
     static final int SHIFT_MODE_LOW = 0;
     static final int SHIFT_MODE_HIGH = 1;
