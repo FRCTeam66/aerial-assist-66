@@ -24,6 +24,8 @@ public class DiagnosticDisplay implements IOParams {
     
     private final Loader loader;
     
+    private final Inputs inputs;
+    
     private boolean diagOff = false;
     
     
@@ -42,7 +44,8 @@ public class DiagnosticDisplay implements IOParams {
             Joystick armStick,
             TankDrive tankDrive,
             Shooter shooter,
-            Loader loader)
+            Loader loader,
+            Inputs inputs)
     {
         this.ds = driverStation;
         this.lcd = lcd;
@@ -53,6 +56,7 @@ public class DiagnosticDisplay implements IOParams {
         this.tankDrive = tankDrive;
         this.shooter = shooter;
         this.loader = loader;
+        this.inputs = inputs;
         
         lcd.println(DriverStationLCD.Line.kUser1, 1, StringUtils.TODO_SPACES_21);
         lcd.println(DriverStationLCD.Line.kUser2, 1, StringUtils.TODO_SPACES_21);
@@ -202,15 +206,11 @@ public class DiagnosticDisplay implements IOParams {
                                                              // 123456789012345678901
                 lcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) 
                     + " " + StringUtils.format (diagnosticSelector.getValue (),5));
-                lcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter        " + StringUtils.format(0, 3, 2));
-                lcd.println(DriverStationLCD.Line.kUser3, 1, 
-                    "Ball Loaded " + (shooter.isBallInShooter() ? "Y " : "N "));
-                s = "Ckd " + (shooter.isCocked() ? "Y " : "N ") +
-                    "Mn/Mx " + StringUtils.format(ARM_POSITION_MIN, 4) + "/" + StringUtils.format(ARM_POSITION_MAX, 4);
-                lcd.println(DriverStationLCD.Line.kUser4, 1, s);
-                lcd.println(DriverStationLCD.Line.kUser5, 1,
-                   "Arm Rate    " + StringUtils.format(1 /* todo */, 3) + "     ");
-                lcd.println(DriverStationLCD.Line.kUser6, 1, ""); // Use text from shoot function.
+                lcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter State    " + StringUtils.format(shooter.currentState, 2));
+                lcd.println(DriverStationLCD.Line.kUser3, 1, "Ball Loaded: " + StringUtils.format(shooter.isBallInShooter()));
+                lcd.println(DriverStationLCD.Line.kUser4, 1, "Shooter Ret LS " + StringUtils.format(shooter.isInHomePosition()));
+                lcd.println(DriverStationLCD.Line.kUser5, 1, "Angle: " + StringUtils.format(shooter.shooterAbsoluteAngle.getValue(),4));
+                lcd.println(DriverStationLCD.Line.kUser6, 1, "Shoot Distance:   " + StringUtils.format(shooter.getShooterRate(),3,4));
                 diagOff = false;
                 break;
 
@@ -219,12 +219,10 @@ public class DiagnosticDisplay implements IOParams {
                 lcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2)
                     + " " + StringUtils.format (diagnosticSelector.getValue (),5));
                 lcd.println(DriverStationLCD.Line.kUser2, 1, "Shooter 2      " + StringUtils.format(0, 3, 2));
-                lcd.println(DriverStationLCD.Line.kUser3, 1,
-                    "Arm Ext LS " + (/* todo */ false ? "P" : "_") + "         ");
-                lcd.println(DriverStationLCD.Line.kUser4, 1,
-                    "Shooter Ret LS " + StringUtils.format(shooter.isInCockedPosition()));
-                lcd.println(DriverStationLCD.Line.kUser5, 1, "Angle: " + StringUtils.format(shooter.getShooterAngle(),3,4));        
-                lcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);
+                lcd.println(DriverStationLCD.Line.kUser3, 1, "Shooter Ret LS " + StringUtils.format(shooter.isInHomePosition()));
+                lcd.println(DriverStationLCD.Line.kUser4, 1, "Angle: " + StringUtils.format(shooter.getShooterAngle(),3,4));        
+                lcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
+                lcd.println(DriverStationLCD.Line.kUser5, 1, StringUtils.TODO_SPACES_21);
                 diagOff = false;
                 break;
 
@@ -249,7 +247,7 @@ public class DiagnosticDisplay implements IOParams {
                 lcd.println(DriverStationLCD.Line.kUser3, 1, s);
                 lcd.println(DriverStationLCD.Line.kUser4, 1, "Loader Out:  " + StringUtils.format(loader.isExtended()));
                 lcd.println(DriverStationLCD.Line.kUser5, 1, "Loader In:   " + StringUtils.format(loader.isRetracted()));
-                lcd.println(DriverStationLCD.Line.kUser6, 1, StringUtils.TODO_SPACES_21);        
+                lcd.println(DriverStationLCD.Line.kUser6, 1, "Auton Mode:  " + StringUtils.format(inputs.getAutonomousMode(),5));        
                 diagOff = false;
                 break;
 
@@ -259,8 +257,8 @@ public class DiagnosticDisplay implements IOParams {
                 lcd.println(DriverStationLCD.Line.kUser1, 1, "T66 - Flyers  " + StringUtils.format (d, 2) + " " 
                     + StringUtils.format (diagnosticSelector.getValue (),5));
                 lcd.println(DriverStationLCD.Line.kUser2, 1, "Ball pickup arm      ");
-                s =      "Ext LS "  + (loader.isExtended() ? "P" : "_");
-                s = s + " Ret LS " + (loader.isRetracted() ? "P" : "_");
+                s =      "Ext LS "  + (loader.isExtended() ? "Y" : "_");
+                s = s + " Ret LS " + (loader.isRetracted() ? "Y" : "_");
                 lcd.println(DriverStationLCD.Line.kUser3, 1, s);
                 lcd.println(DriverStationLCD.Line.kUser4, 1,
                     "Ext Sol " + (loader.isExtending() ? "N" : "F")

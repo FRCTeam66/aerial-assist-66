@@ -38,13 +38,13 @@ public class Inputs implements IOParams, ControllerParams {
     
     public double getRightDriveSpeed()
     {
-        double v = driverController.getAxis(RIGHT_DRIVE_AXIS_ID);
+        double v = driverController.getRawAxis(RIGHT_DRIVE_AXIS_ID);
         return Math.abs(v) > JOYSTICK_DEADBAND ? v : 0.0;
     }
     
     public double getLeftDriveSpeed()
     {
-        double v = driverController.getAxis(LEFT_DRIVE_AXIS_ID);
+        double v = driverController.getRawAxis(LEFT_DRIVE_AXIS_ID);
         return Math.abs(v) > JOYSTICK_DEADBAND ? v : 0.0;
     }
     
@@ -81,7 +81,7 @@ public class Inputs implements IOParams, ControllerParams {
     
     public double getManualShooterControlSpeed()
     {
-        double v = shooterController.getAxis(MANUAL_SHOOTER_MOVE_AXIS_ID);
+        double v = shooterController.getRawAxis(MANUAL_SHOOTER_MOVE_AXIS_ID);
         return (Math.abs(v) > JOYSTICK_DEADBAND) ? v : 0;
     }
     
@@ -109,5 +109,10 @@ public class Inputs implements IOParams, ControllerParams {
     public boolean getRollInButton()
     {
         return shooterController.getRawButton(ROLL_IN_LOADER_BUTTON_ID);
+    }
+    
+    public boolean getShootHomeButton()
+    {
+        return shooterController.getRawButton(RESET_SHOOTER_HOME_BUTTON_ID);
     }
 }

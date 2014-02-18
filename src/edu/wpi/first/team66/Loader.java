@@ -11,6 +11,10 @@ public class Loader implements IOParams {
     public static final int ROLLER_OFF = 0;
     public static final int ROLLER_OUT = 1;
     
+    //DIO pins pulled high, and switches N.O, so define switch press in 
+    //terms of T & F
+    private static final boolean LOADER_SW_PRESSED = false;
+    
     private final Solenoid armRetractSolenoid;
     private final Solenoid armExtendSolenoid;
     
@@ -43,7 +47,7 @@ public class Loader implements IOParams {
     }
     
     public boolean isRetracted() {
-        return armRetractedSwitch.get();
+        return armRetractedSwitch.get() == LOADER_SW_PRESSED ? true:false;
     }
     
     public boolean isExtending() {
@@ -51,7 +55,7 @@ public class Loader implements IOParams {
     }
     
     public boolean isExtended() {
-        return armExtendedSwitch.get();
+        return armExtendedSwitch.get() == LOADER_SW_PRESSED ? true:false;
     }
     
     public double getRollorSpeed() {

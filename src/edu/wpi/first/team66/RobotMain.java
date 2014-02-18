@@ -164,9 +164,12 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Joystick;
 
+import edu.wpi.first.wpilibj.PIDController;
+
 
 import edu.wpi.first.team66.params.IOParams;
 import edu.wpi.first.team66.params.StateParams;
+import edu.wpi.first.wpilibj.PIDSource;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -250,6 +253,8 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         Encoder shooterMotorEncoder  = new Encoder(DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_0, 
                                            DIO_SLOT, SHOOTER_ARM_ENCODER_BIT_1);
         shooterMotorEncoder.setDistancePerPulse(ENCODER_SHOOTER_DISTANCE_PER_PULSE);
+        shooterMotorEncoder.setReverseDirection(IS_SHOOTER_MOTOR_REVERSED);
+        shooterMotorEncoder.setPIDSourceParameter(PIDSource.PIDSourceParameter.kRate);
         shooterMotorEncoder.start();
         
         DigitalInput shooterCockedLimitSwitch = new DigitalInput(SHOOTER_COCKED_LIMIT_SWITCH_DI_CHANNEL);
@@ -259,6 +264,9 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         
         AnalogChannel shooterAbsoluteAngle = new AnalogChannel(ARM_POSITION_POT_AI_CHANNEL);
         
+        PIDController shooterPositionPID = new PIDController(0.02d,0d,0d,shooterAbsoluteAngle,shooterMotor);
+        PIDController shooterSpeedPID = new PIDController(0.8d,0d,0d,0.5d,shooterMotorEncoder,shooterMotor);
+        
         shooter = new Shooter(
                 shooterMotor,
                 shooterMotorEncoder,
@@ -266,6 +274,8 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
                 shooterAbsoluteAngle,
                 shooterCockedLimitSwitch,
                 shooterShotLimitSwitch,
+                shooterPositionPID,
+                shooterSpeedPID,
                 loader);
 
         // Misc.
@@ -286,7 +296,8 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
                 null,
                 tankDrive,
                 shooter,
-                loader);
+                loader,
+                inputs);
     }
 
     public void autonomousInit () {
@@ -295,13 +306,13 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         
         switch (inputs.getAutonomousMode()) {
             case AMODE_DO_NOTHING:
-                autoStateMachine.setState(DoNothingState.instance);
+                autoStateMachine.setState(new DoNothingState());
                 break;
             case AMODE_DRIVE_FORWARD:
-                autoStateMachine.setState(Mode1InitState.instance);
+                autoStateMachine.setState(new Mode1InitState());
                 break;
             default:
-                autoStateMachine.setState(DoNothingState.instance);
+                autoStateMachine.setState(new DoNothingState());
         }
     }
 
@@ -365,7 +376,7 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         
         if (inputs.getShootButton()) {
             // TODO
-            shooter.shoot(0, 0);
+            shooter.shoot(800, 145);
         }
         else if(inputs.getTrussTossButton()){
             shooter.trussToss();
@@ -373,6 +384,11 @@ public class RobotMain extends IterativeRobot implements IOParams, StateParams, 
         else{
             shooter.stop();
         }
+        
+        if (inputs.getShootHomeButton()){
+            shooter.resetShooter();
+        }
+            
         
         double deltaTime = periodicTimer.getDeltaTime();
         boolean checkExtended = !inputs.getOverrideLoaderExtendedCheckButton();

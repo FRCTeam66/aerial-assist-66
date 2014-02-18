@@ -13,8 +13,10 @@ public class StringUtils {
     // Limitations for all routines is 10.10 (limited by the constants "spaces" and "zeros")
     public static String format(int i, int w) {
         String s;
-
         s = String.valueOf(i);
+        if(i<0){
+        s ="-"+ s;
+        }
         s = TODO_SPACES + s.trim();
         return s.substring(s.length() - w + 1);
     } // private String format(int
